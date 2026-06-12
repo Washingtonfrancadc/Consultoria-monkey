@@ -307,7 +307,7 @@
                         let refKcal = 0, refCarbo = 0, refProt = 0, refGord = 0;
                         let lines = ref.alimentos.map(al => {
                             refKcal += al.kcalTotal; refCarbo += al.carboTotal; refProt += al.protTotal; refGord += al.gordTotal;
-                            return `<tr><td>${al.nome}</td><td>${al.quantidade}g</td><td style="font-size:12px; color:var(--texto-mutado);">${Math.round(al.carboTotal)}g C / ${Math.round(al.protTotal)}g P / ${Math.round(al.gordTotal)}g G</td></tr>`;
+                            return `<tr><td>${al.nome}</td><td>${al.quantidade}</td><td style="font-size:12px; color:var(--texto-mutado);">${Math.round(al.carboTotal)} C / ${Math.round(al.protTotal)} P / ${Math.round(al.gordTotal)} G</td></tr>`;
                         }).join('');
 
                         return `
@@ -339,9 +339,9 @@
                                 ${htmlRefeicoesInternas}
                                 <div class="resumo-macros">
                                     <div class="macro-box"><p>Kcal Dia</p><div style="color:var(--cor-neon);">${Math.round(diaKcal)}</div></div>
-                                    <div class="macro-box"><p>Carbo</p><div>${Math.round(diaCarbo)}g</div></div>
-                                    <div class="macro-box"><p>Prot</p><div>${Math.round(diaProt)}g</div></div>
-                                    <div class="macro-box"><p>Gord</p><div>${Math.round(diaGord)}g</div></div>
+                                    <div class="macro-box"><p>Carbo</p><div>${Math.round(diaCarbo)}</div></div>
+                                    <div class="macro-box"><p>Prot</p><div>${Math.round(diaProt)}</div></div>
+                                    <div class="macro-box"><p>Gord</p><div>${Math.round(diaGord)}</div></div>
                                 </div>
                             </div>
                         </div>
@@ -372,8 +372,8 @@
         }
 
         function gerenciarIframeInjetado(exId, url) {
-            const linhaEx = document.getElementById(`linha-ex-${exId}`);
-            if (!linhaEx) return;
+            const staticLine = document.getElementById(`linha-ex-${exId}`);
+            if (!staticLine) return;
 
             if (idExercicioComGifAberto === exId) {
                 removerLinhaGifComAnimacao();
@@ -394,7 +394,7 @@
                 </td>
             `;
 
-            linhaEx.parentNode.insertBefore(novaLinha, linhaEx.nextSibling);
+            staticLine.parentNode.insertBefore(novaLinha, staticLine.nextSibling);
             idExercicioComGifAberto = exId;
 
             setTimeout(() => {
@@ -426,7 +426,6 @@
             });
         }
 
-        // Nova Função Captura de Pré-visualização Múltipla
         function capturarPreviewMultiplo(input, posicao) {
             const file = input.files[0];
             const preview = document.getElementById(`preview-${posicao}`);
@@ -445,7 +444,6 @@
             }
         }
 
-        // Função de envio unificada tratando as 4 posições
         async function enviarFeedbackCompleto() {
             const texto = document.getElementById('feedback-texto').value.trim();
             const btn = document.getElementById('btn-enviar-feedback');
@@ -455,10 +453,8 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando Relatório...';
 
-            // Armazenará os links gerados do Storage do Supabase
             let urlsGeradas = { frente: null, lado_esq: null, costas: null, lado_dir: null };
 
-            // Laço para rodar o upload das imagens selecionadas
             for (let posicao in arquivosFotos) {
                 if (arquivosFotos[posicao]) {
                     try {
@@ -479,15 +475,14 @@
                 }
             }
 
-            // Envia para a tabela 'feedbacks_alunos'
             try {
                 const { error: insertError } = await _supabase
                     .from('feedbacks_alunos')
                     .insert({
                         aluno_id: alunoIdSelecionado,
                         comentario: texto,
-                        foto_url: urlsGeradas.frente,       // Link principal (Frente)
-                        foto_lado_esq: urlsGeradas.lado_esq, // Garanta que essas colunas existam na tabela!
+                        foto_url: urlsGeradas.frente,
+                        foto_lado_esq: urlsGeradas.lado_esq,
                         foto_costas: urlsGeradas.costas,
                         foto_lado_dir: urlsGeradas.lado_dir
                     });
@@ -496,7 +491,6 @@
 
                 alert("Boa, o relatório com as fotos foi enviado com sucesso! O gorila tá evoluindo! 🦍");
                 
-                // Reseta os campos do formulário
                 document.getElementById('feedback-texto').value = "";
                 arquivosFotos = { frente: null, lado_esq: null, costas: null, lado_dir: null };
                 
