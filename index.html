@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MONKEY CONSULTORIA - PAINEL</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <div class="container" id="appContainer">
+        
+        <div class="painel-admin" id="painelAdmin">
+            <h3><i class="fa-solid fa-user-gear"></i> Modo Treinador</h3>
+            <select class="select-aluno" id="selectAluno" onchange="trocarAlunoNoPainel(this.value)"></select>
+            <div class="grupo-botoes">
+                <button class="btn btn-modo" id="btnEditar"><i class="fa-solid fa-pen-to-square"></i> Ativar Edição</button>
+                <button class="btn btn-alunos" id="btnGerenciarAlunos" style="display: none;" onclick="abrirModalAlunos()"><i class="fa-solid fa-users-gear"></i> Alunos</button>
+                <button class="btn btn-salvar" id="btnSalvar" style="display: none;" onclick="salvarAlteracoesNoBanco()"><i class="fa-solid fa-cloud-arrow-up"></i> Salvar no Supabase</button>
+            </div>
+        </div>
+
+        <div class="header-app">
+            <h1>MONKEY <span>CONSULTORIA</span></h1>
+            <div class="slogan">Liberte o gorila dentro de você</div>
+        </div>
+
+        <div class="menu-abas">
+            <button class="aba-link ativa" data-aba="aba-treino">Treino</button>
+            <button class="aba-link" data-aba="aba-dieta">Dieta</button>
+            <button class="aba-link" data-aba="aba-evolucao">Evolução</button>
+        </div>
+
+        <div id="aba-treino" class="conteudo-aba ativa">
+            <div class="form-cadastro btn-admin-acao" style="display: none;">
+                <p style="color: var(--cor-neon); font-size:13px; font-weight:bold; margin-bottom:5px;"><i class="fa-solid fa-dumbbell"></i> Inserir Novo Exercício Geral na Biblioteca</p>
+                <div class="form-row">
+                    <input type="text" id="add-lib-musculo" class="input-inline" placeholder="Grupamento (Ex: Peito, Pernas)">
+                    <input type="text" id="add-lib-nome" class="input-inline" placeholder="Nome do Exercício">
+                </div>
+                <input type="text" id="add-lib-gif" class="input-inline" placeholder="URL do GIF do FitnessProgramer (Embed)">
+                <button class="btn btn-salvar" onclick="dbCadastrarExercicio()" style="justify-content: center; background:#3b82f6;"><i class="fa-solid fa-folder-plus"></i> Sincronizar na Biblioteca</button>
+            </div>
+
+            <div id="container-blocos-treino"></div>
+
+            <div class="container-gif" id="containerGif">
+                <iframe id="videoIframe" src="" allowfullscreen></iframe>
+            </div>
+
+            <button class="btn btn-add btn-admin-acao" id="btn-novo-bloco-treino" style="display: none; background: #1e293b; margin-bottom: 20px;"><i class="fa-solid fa-calendar-plus"></i> + Novo Dia de Treino</button>
+        </div>
+
+        <div id="aba-dieta" class="conteudo-aba">
+            <div class="form-cadastro btn-admin-acao" style="display: none;">
+                <p style="color: var(--cor-neon); font-size:13px; font-weight:bold; margin-bottom:5px;"><i class="fa-solid fa-plate-wheat"></i> Inserir Novo Alimento Base na Reference</p>
+                <div class="form-row">
+                    <input type="text" id="add-ref-nome" class="input-inline" placeholder="Nome do Alimento">
+                    <select id="add-ref-macro-tipo" class="input-inline" style="background:#0f172a; color:white;">
+                        <option value="Carbo">Carbo</option>
+                        <option value="Proteína">Proteína</option>
+                        <option value="Gordura">Gordura</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <input type="number" id="add-ref-qtd" class="input-inline" placeholder="Porção Base (Ex: 100g)">
+                    <input type="number" step="0.1" id="add-ref-carbo" class="input-inline" placeholder="Carbo (g)">
+                    <input type="number" step="0.1" id="add-ref-prot" class="input-inline" placeholder="Proteína (g)">
+                    <input type="number" step="0.1" id="add-ref-gord" class="input-inline" placeholder="Gordura (g)">
+                </div>
+                <button class="btn btn-salvar" onclick="dbCadastrarAlimentoReferencia()" style="justify-content: center; background:#10b981;"><i class="fa-solid fa-square-plus"></i> Sincronizar Alimento Base</button>
+            </div>
+
+            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 20px;">
+                <div class="menu-dieta-dias" id="container-dias-dieta" style="margin-bottom: 0; flex-grow: 1;"></div>
+                <button class="btn btn-admin-acao" id="btn-novo-dia-dieta" style="display: none; background: #3b82f6; color: white; padding: 10px 15px;"><i class="fa-solid fa-plus"></i></button>
+            </div>
+
+            <div id="conteudo-refeicoes-dinamicas"></div>
+        </div>
+
+        <div id="aba-evolucao" class="conteudo-aba">
+            <div class="bloco-secao">
+                <div class="titulo-secao">Envio de Fotos de Progresso</div>
+                <p style="font-size: 13px; color: var(--texto-mutado); margin-bottom: 15px;">Tire as fotos preferencialmente pela manhã em jejum.</p>
+                <div class="grid-fotos">
+                    <div class="foto-box"><i class="fa-solid fa-camera fa-xl"></i><span style="margin-top:8px;">Frente</span></div>
+                    <div class="foto-box"><i class="fa-solid fa-camera fa-xl"></i><span style="margin-top:8px;">Perfil</span></div>
+                    <div class="foto-box"><i class="fa-solid fa-camera fa-xl"></i><span style="margin-top:8px;">Costas</span></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal-biblioteca" id="modalBiblioteca">
+        <div class="modal-conteudo">
+            <div class="modal-header">
+                <h3 style="color: white;"><i class="fa-solid fa-folder-open" style="color: var(--cor-neon);"></i> Selecione o Exercício</h3>
+                <button onclick="fecharModalBiblioteca()" style="background:none; border:none; color:white; font-size:20px; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" id="modalBodyPastas"></div>
+        </div>
+    </div>
+
+    <div class="modal-biblioteca" id="modalAlimentosRef">
+        <div class="modal-conteudo">
+            <div class="modal-header">
+                <h3 style="color: white;"><i class="fa-solid fa-basket-shopping" style="color: var(--cor-neon);"></i> Selecione o Alimento por Macro</h3>
+                <button onclick="fecharModalAlimentosRef()" style="background:none; border:none; color:white; font-size:20px; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" id="modalBodyPastasAlimentos"></div>
+        </div>
+    </div>
+
+    <div class="modal-biblioteca" id="modalAlunos">
+        <div class="modal-conteudo" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 style="color: white;"><i class="fa-solid fa-users-gear" style="color: var(--cor-neon);"></i> Painel de Alunos</h3>
+                <button onclick="fecharModalAlunos()" style="background:none; border:none; color:white; font-size:20px; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-cadastro" style="background: #111827; margin-top:0;">
+                    <p style="color:var(--cor-neon); font-size:12px; font-weight:bold;"><i class="fa-solid fa-user-plus"></i> Adicionar Aluno Novo</p>
+                    <div class="form-row">
+                        <input type="text" id="novo-nome-aluno" class="input-inline" placeholder="Nome Completo">
+                        <input type="email" id="novo-email-aluno" class="input-inline" placeholder="E-mail de Login">
+                    </div>
+                    <button class="btn btn-salvar" onclick="dbCriarAlunoRaiz()" style="justify-content:center;"><i class="fa-solid fa-plus"></i> Inserir Aluno</button>
+                </div>
+                <p style="color: var(--texto-mutado); font-size:12px; font-weight:bold; margin-top:15px; text-transform:uppercase;">Alunos Cadastrados:</p>
+                <div class="lista-alunos-gerenciar" id="listaAlunosParaEditar"></div>
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>

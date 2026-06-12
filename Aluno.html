@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monkey Consultoria - Área do Aluno</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg-principal: #0b0f19;
+            --bg-card: #1f2937;
+            --cor-neon: #a3e635; /* Verde limão/neon da Monkey */
+            --texto-claro: #f3f4f6;
+            --texto-mutado: #9ca3af;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial', sans-serif; }
+        body { background-color: var(--bg-principal); color: var(--texto-claro); padding-bottom: 60px; }
+
+        .header-consultoria { text-align: center; padding: 30px 20px; background: linear-gradient(180deg, #111827 0%, var(--bg-principal) 100%); }
+        .header-consultoria h1 { color: var(--texto-claro); font-size: 28px; letter-spacing: 1px; }
+        .header-consultoria h1 span { color: var(--cor-neon); }
+        .header-consultoria p { color: var(--texto-mutado); font-style: italic; font-size: 14px; margin-top: 5px; }
+
+        /* Menu de Abas */
+        .menu-abas { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; padding: 0 15px; }
+        .aba-link { background: #111827; border: 1px solid #374151; color: var(--texto-mutado); padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; flex: 1; max-width: 150px; text-align: center; }
+        .aba-link.ativa { background: var(--cor-neon); color: #000; border-color: var(--cor-neon); }
+
+        .app-container { max-width: 600px; margin: 0 auto; padding: 0 15px; }
+        .conteudo-aba { display: none; }
+        .conteudo-aba.ativa { display: block; }
+
+        /* Blocos e Secções */
+        .bloco-secao { background: var(--bg-card); border-radius: 12px; margin-bottom: 15px; border: 1px solid #374151; overflow: hidden; }
+        .header-bloco { display: flex; align-items: center; justify-content: space-between; padding: 16px; cursor: pointer; }
+        .titulo-secao { font-weight: bold; font-size: 16px; display: flex; align-items: center; width: 100%; }
+        .seta-recolher { margin-left: auto; transition: 0.3s; color: var(--texto-mutado); }
+        .bloco-secao.expandido .seta-recolher { transform: rotate(180deg); }
+        
+        .corpo-recolhivel { display: none; padding: 0 16px 16px 16px; }
+        .bloco-secao.expandido .corpo-recolhivel { display: block; }
+
+        /* Tabelas de Treino e Dieta */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { text-align: left; color: var(--texto-mutado); font-size: 12px; padding-bottom: 8px; text-transform: uppercase; }
+        td { padding: 12px 0; border-top: 1px solid #374151; font-size: 14px; }
+
+        /* Container do GIF corrigido para Mobile e centralizado abaixo da lista */
+        #containerGif { 
+            display: none; 
+            max-width: 364px; 
+            width: 100%;
+            height: 364px; 
+            background: #000; 
+            border-radius: 8px; 
+            margin: 15px auto; /* Centraliza horizontalmente e dá espaçamento vertical */
+            border: 1px solid var(--cor-neon); 
+            padding: 1px; 
+            overflow: hidden;
+        }
+
+        /* Player interno responsivo */
+        #videoIframe { 
+            width: 100%; 
+            height: 100%; 
+            border-radius: 8px; 
+            border: none; 
+            display: block; 
+            overflow: hidden;
+        }
+
+        /* Seletor de Dias de Dieta */
+        .lista-dias-dieta { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 15px; padding-bottom: 5px; }
+        .btn-dia { background: #111827; border: 1px solid #374151; color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 13px; cursor: pointer; white-space: nowrap; }
+        .btn-dia.ativo { background: transparent; border-color: var(--cor-neon); color: var(--cor-neon); }
+
+        /* Macros da Dieta */
+        .resumo-macros { display: flex; justify-content: space-between; margin-top: 15px; background: #111827; padding: 12px; border-radius: 8px; gap: 5px; }
+        .macro-box { text-align: center; flex: 1; }
+        .macro-box p { font-size: 11px; color: var(--texto-mutado); text-transform: uppercase; }
+        .macro-box div { font-size: 14px; font-weight: bold; margin-top: 4px; color: var(--texto-claro); }
+
+        /* Formulário de Evolução */
+        .campo-form { margin-bottom: 15px; }
+        .campo-form label { display: block; color: var(--texto-mutado); font-size: 13px; margin-bottom: 6px; }
+        .input-texto { width: 100%; background: #111827; border: 1px solid #374151; color: #fff; padding: 12px; border-radius: 8px; font-size: 14px; }
+        .input-texto:focus { border-color: var(--cor-neon); outline: none; }
+        
+        /* Upload Customizado */
+        .upload-container { position: relative; width: 100%; background: #111827; border: 2px dashed #374151; border-radius: 8px; padding: 20px; text-align: center; cursor: pointer; }
+        .upload-container:hover { border-color: var(--cor-neon); }
+        .upload-container input[type="file"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        .preview-imagem { max-width: 100%; max-height: 200px; margin-top: 10px; border-radius: 6px; display: none; }
+
+        .btn-enviar { width: 100%; background: var(--cor-neon); color: #000; font-weight: bold; padding: 14px; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-enviar:disabled { background: #4b5563; color: #9ca3af; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+    <div class="header-consultoria">
+        <h1>MONKEY <span>CONSULTORIA</span></h1>
+        <p>liberte o gorila dentro de você</p>
+    </div>
+
+    <div class="menu-abas">
+        <div class="aba-link ativa" data-aba="aba-treino"><i class="fa-solid fa-dumbbell"></i> Treino</div>
+        <div class="aba-link" data-aba="aba-dieta"><i class="fa-solid fa-apple-whole"></i> Dieta</div>
+        <div class="aba-link" data-aba="aba-evolucao"><i class="fa-solid fa-chart-line"></i> Evolução</div>
+    </div>
+
+    <div class="app-container">
+
+        <div id="aba-treino" class="conteudo-aba ativa">
+            <div id="container-blocos-treino"></div>
+            
+            <div id="containerGif">
+                <iframe id="videoIframe" src="" allow="autoplay"></iframe>
+            </div>
+        </div>
+
+        <div id="aba-dieta" class="conteudo-aba">
+            <div class="lista-dias-dieta" id="container-dias-dieta"></div>
+            <div id="conteudo-refeicoes-dinamicas"></div>
+        </div>
+
+        <div id="aba-evolucao" class="conteudo-aba">
+            <div class="bloco-secao expandido" style="border-color: var(--cor-neon);">
+                <div class="header-bloco" style="cursor: default;">
+                    <div class="titulo-secao" style="color: var(--cor-neon);"><i class="fa-solid fa-comment-dots" style="margin-right: 8px;"></i> Relatório de Evolução Semanal</div>
+                </div>
+                <div class="corpo-recolhivel">
+                    <div class="campo-form">
+                        <label>Como foi a adesão ao plano de treino e dieta nesta semana?</label>
+                        <textarea id="feedback-texto" class="input-texto" rows="5" placeholder="Conte-me sobre sua força, cansaço, falhas na dieta ou dores..."></textarea>
+                    </div>
+
+                    <div class="campo-form">
+                        <label>Foto de Evolução (Frente, Lado ou Costas)</label>
+                        <div class="upload-container">
+                            <i class="fa-solid fa-cloud-arrow-up" style="font-size: 24px; color: var(--cor-neon); margin-bottom: 8px;"></i>
+                            <p id="upload-status" style="font-size: 13px;">Clique aqui para selecionar ou tirar a foto</p>
+                            <input type="file" id="feedback-foto" accept="image/*" onchange="capturarPreviewFoto(this)">
+                            <img id="img-preview" class="preview-imagem" src="" alt="Preview">
+                        </div>
+                    </div>
+
+                    <button id="btn-enviar-feedback" class="btn-enviar" onclick="enviarFeedbackCompleto()">
+                        <i class="fa-solid fa-paper-plane"></i> Enviar Atualização 🦍
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://wtaluaiatlguefgwuuxy.supabase.co'; 
+        const SUPABASE_KEY = 'sb_publishable_XWA4yh4y8ShcWjg88jfKlg_YYNbFX2g'; 
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let dadosDoAluno = { rotinasTreino: [], rotinasDieta: [] };
+        let alunoIdSelecionado = "";
+        let gifAtualSendoExibido = "";
+        let idDiaDietaAtivo = "";
+        let estadosAbasExpandidas = {};
+        let arquivoFotoSelecionado = null;
+
+        window.onload = async function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            alunoIdSelecionado = urlParams.get('id');
+
+            if(!alunoIdSelecionado) {
+                document.body.innerHTML = `<div style="text-align:center; padding:50px; color:var(--texto-mutado);">
+                    <h2>Acesso Restrito</h2><p style="margin-top:10px;">Por favor, utilize o link direto fornecido pelo seu treinador.</p>
+                </div>`;
+                return;
+            }
+
+            await puxarDadosDoAlunoDoBanco();
+            configurarAbas();
+        };
+
+        async function puxarDadosDoAlunoDoBanco() {
+            let { data: blocos } = await _supabase.from('treinos_blocos').select('*').eq('aluno_id', alunoIdSelecionado).order('ordem');
+            let treinos = [];
+            if(blocos) {
+                for(let b of blocos) {
+                    let { data: exs } = await _supabase.from('treinos_exercicios').select('*').eq('bloco_id', b.id);
+                    treinos.push({ idBloco: b.id, nomeBloco: b.nome_bloco, exercicios: exs || [] });
+                }
+            }
+
+            let { data: dias } = await _supabase.from('dieta_dias').select('*').eq('aluno_id', alunoIdSelecionado).order('ordem');
+            let dietas = [];
+            if(dias) {
+                for(let d of dias) {
+                    let { data: alims } = await _supabase.from('dieta_alimentos').select('*').eq('dia_id', d.id);
+                    let refs = {};
+                    if(alims) {
+                        alims.forEach(al => {
+                            if(!refs[al.nome_refeicao]) refs[al.nome_refeicao] = { nomeRefeicao: al.nome_refeicao, alimentos: [] };
+                            let q = al.quantidade;
+                            refs[al.nome_refeicao].alimentos.push({
+                                id: al.id, nome: al.nome_alimento, quantidade: q,
+                                carboTotal: Number((al.carbo_g * q).toFixed(1)), protTotal: Number((al.prot_g * q).toFixed(1)), gordTotal: Number((al.gord_g * q).toFixed(1)), kcalTotal: Number((al.kcal_g * q).toFixed(0))
+                            });
+                        });
+                    }
+                    dietas.push({ idDia: d.id, nomeDia: d.nome_dia, refeicoes: Object.values(refs) });
+                }
+            }
+
+            dadosDoAluno.rotinasTreino = treinos;
+            dadosDoAluno.rotinasDieta = dietas;
+            if(dadosDoAluno.rotinasDieta.length > 0 && !idDiaDietaAtivo) idDiaDietaAtivo = dadosDoAluno.rotinasDieta[0].idDia;
+            
+            renderizarModoAluno();
+        }
+
+        function renderizarModoAluno() {
+            document.getElementById('container-blocos-treino').innerHTML = dadosDoAluno.rotinasTreino.map(b => `
+                <div class="bloco-secao ${estadosAbasExpandidas[b.idBloco] ? 'expandido' : ''}" id="${b.idBloco}">
+                    <div class="header-bloco" onclick="alternarBlocoLayout('${b.idBloco}')">
+                        <div class="titulo-secao">${b.nomeBloco} <i class="fa-solid fa-chevron-down seta-recolher"></i></div>
+                    </div>
+                    <div class="corpo-recolhivel">
+                        <table>
+                            <thead><tr><th>Exercício</th><th>Séries</th><th>Reps</th><th>Desc.</th></tr></thead>
+                            <tbody>
+                                ${b.exercicios.map(ex => `<tr><td style="color:var(--cor-neon); cursor:pointer;" onclick="gerenciarAnimacaoGif('${ex.gif_url}')"><i class="fa-solid fa-play-circle" style="margin-right:5px;"></i>${ex.nome}</td><td>${ex.series}</td><td>${ex.reps}</td><td>${ex.descanso}</td></tr>`).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('container-dias-dieta').innerHTML = dadosDoAluno.rotinasDieta.map(d => `<button class="btn-dia ${d.idDia === idDiaDietaAtivo ? 'ativo' : ''}" onclick="idDiaDietaAtivo='${d.idDia}'; renderizarModoAluno();">${d.nomeDia}</button>`).join('');
+            
+            const dia = dadosDoAluno.rotinasDieta.find(d => d.idDia === idDiaDietaAtivo);
+            if(!dia || dia.refeicoes.length === 0) { 
+                document.getElementById('conteudo-refeicoes-dinamicas').innerHTML = '<p style="text-align:center; padding:20px; color:var(--texto-mutado);">Nenhum protocolo ativo para este dia.</p>'; 
+                return; 
+            }
+
+            document.getElementById('conteudo-refeicoes-dinamicas').innerHTML = dia.refeicoes.map((ref, rIdx) => {
+                const idRef = `ref_${dia.idDia}_${rIdx}`;
+                let k=0, c=0, p=0, g=0;
+                let linhas = ref.alimentos.map(al => { k+=al.kcalTotal; c+=al.carboTotal; p+=al.protTotal; g+=al.gordTotal; return `<tr><td>${al.nome}</td><td>${al.quantidade}g</td><td style="font-size:12px; color:var(--texto-mutado);">${Math.round(al.carboTotal)}g C / ${Math.round(al.protTotal)}g P / ${Math.round(al.gordTotal)}g G</td></tr>`; }).join('');
+                return `
+                    <div class="bloco-secao ${estadosAbasExpandidas[idRef] ? 'expandido' : ''}" id="${idRef}">
+                        <div class="header-bloco" onclick="alternarBlocoLayout('${idRef}')">
+                            <div class="titulo-secao">${ref.nomeRefeicao} <span style="font-size:12px; color:var(--cor-neon); margin-left:auto; margin-right:10px;">${Math.round(k)} Kcal</span> <i class="fa-solid fa-chevron-down seta-recolher"></i></div>
+                        </div>
+                        <div class="corpo-recolhivel">
+                            <table><thead><tr><th>Alimento</th><th>Qtd</th><th>Macros</th></tr></thead><tbody>${linhas}</tbody></table>
+                            <div class="resumo-macros">
+                                <div class="macro-box"><p>Kcal</p><div>${Math.round(k)}</div></div><div class="macro-box"><p>Carbo</p><div>${Math.round(c)}g</div></div><div class="macro-box"><p>Prot</p><div>${Math.round(p)}g</div></div><div class="macro-box"><p>Gord</p><div>${Math.round(g)}g</div></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function alternarBlocoLayout(id) {
+            const el = document.getElementById(id);
+            if(el) { 
+                el.classList.toggle('expandido'); 
+                estadosAbasExpandidas[id] = el.classList.contains('expandido'); 
+                if(!el.classList.contains('expandido')) fecharIframeSuave();
+            }
+        }
+
+        function gerenciarAnimacaoGif(url) {
+            const c = document.getElementById('containerGif'); 
+            const ifr = document.getElementById('videoIframe');
+            
+            c.style.transition = 'max-height 0.5s ease-in-out, opacity 0.5s ease-in-out, transform 0.5s ease-in-out';
+            c.style.overflow = 'hidden';
+
+            if (gifAtualSendoExibido === url) { 
+                fecharIframeSuave();
+                return; 
+            }
+            
+            if (gifAtualSendoExibido !== "" && c.style.opacity === '1') {
+                c.style.opacity = '0';
+                c.style.transform = 'translateY(15px)';
+                setTimeout(() => {
+                    ifr.src = url;
+                    gifAtualSendoExibido = url;
+                    c.style.opacity = '1';
+                    c.style.transform = 'translateY(0)';
+                }, 200);
+            } else {
+                ifr.src = url; 
+                gifAtualSendoExibido = url;
+                c.style.maxHeight = '0px';
+                c.style.opacity = '0';
+                c.style.transform = 'translateY(40px)'; 
+                c.style.display = 'block'; 
+                c.offsetHeight; 
+
+                c.style.maxHeight = '500px'; 
+                c.style.opacity = '1';
+                c.style.transform = 'translateY(0)';
+                c.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        function fecharIframeSuave() {
+            const c = document.getElementById('containerGif');
+            const ifr = document.getElementById('videoIframe');
+            if(!c || gifAtualSendoExibido === "") return;
+            c.style.maxHeight = '0px';
+            c.style.opacity = '0';
+            c.style.transform = 'translateY(40px)'; 
+            setTimeout(() => { if (ifr) ifr.src = ""; gifAtualSendoExibido = ""; }, 500);
+        }
+
+        function fecharIframeImediato() { 
+            const c = document.getElementById('containerGif');
+            if(c) { c.style.transition = 'none'; c.style.maxHeight = '0px'; c.style.opacity = '0'; c.style.transform = 'translateY(40px)'; }
+            const ifr = document.getElementById('videoIframe');
+            if(ifr) ifr.src = ""; 
+            gifAtualSendoExibido = ""; 
+        }
+
+        function configurarAbas() {
+            document.querySelectorAll('.menu-abas .aba-link').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.menu-abas .aba-link').forEach(b => b.classList.remove('ativa'));
+                    document.querySelectorAll('.conteudo-aba').forEach(c => c.classList.remove('ativa'));
+                    btn.classList.add('ativa'); 
+                    document.getElementById(btn.dataset.aba).classList.add('ativa');
+                    fecharIframeImediato();
+                });
+            });
+        }
+
+        function capturarPreviewFoto(input) {
+            const file = input.files[0];
+            const preview = document.getElementById('img-preview');
+            const statusText = document.getElementById('upload-status');
+            
+            if (file) {
+                arquivoFotoSelecionado = file;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    statusText.innerText = "Foto selecionada: " + file.name;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function enviarFeedbackCompleto() {
+            const texto = document.getElementById('feedback-texto').value.trim();
+            const btn = document.getElementById('btn-enviar-feedback');
+            
+            if(!texto) return alert("Por favor, preencha o seu comentário semanal.");
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
+
+            let urlPublicaFoto = null;
+
+            try {
+                if (arquivoFotoSelecionado) {
+                    const extensao = arquivoFotoSelecionado.name.split('.').pop();
+                    const nomeArquivo = `${alunoIdSelecionado}/${Date.now()}.${extensao}`;
+
+                    let { error: uploadError } = await _supabase.storage
+                        .from('fotos-evolucao')
+                        .upload(nomeArquivo, arquivoFotoSelecionado);
+
+                    if (uploadError) throw uploadError;
+                    urlPublicaFoto = `${SUPABASE_URL}/storage/v1/object/public/fotos-evolucao/${nomeArquivo}`;
+                }
+
+                const { error: insertError } = await _supabase
+                    .from('feedbacks_alunos')
+                    .insert({
+                        aluno_id: alunoIdSelecionado,
+                        comentario: texto,
+                        foto_url: urlPublicaFoto
+                    });
+
+                if (insertError) throw insertError;
+
+                alert("Boa, o relatório foi enviado com sucesso! O gorila tá evoluindo! 🦍");
+                
+                document.getElementById('feedback-texto').value = "";
+                document.getElementById('feedback-foto').value = "";
+                document.getElementById('img-preview').style.display = 'none';
+                document.getElementById('upload-status').innerText = "Clique aqui para selecionar ou tirar a foto";
+                arquivoFotoSelecionado = null;
+
+            } catch (err) {
+                console.error(err);
+                alert("Ocorreu um erro ao processar o envio. Tente novamente.");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Atualização 🦍';
+            }
+        }
+    </script>
+</body>
+</html>
