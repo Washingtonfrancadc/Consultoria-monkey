@@ -48,7 +48,7 @@
             padding: 0 16px;
         }
         .bloco-secao.expandido .corpo-recolhivel { 
-            max-height: 2000px; /* Valor alto o suficiente para comportar o conteúdo livremente */
+            max-height: 2000px; 
             opacity: 1; 
             padding: 0 16px 16px 16px;
         }
@@ -100,13 +100,20 @@
         .input-texto { width: 100%; background: #111827; border: 1px solid #374151; color: #fff; padding: 12px; border-radius: 8px; font-size: 14px; }
         .input-texto:focus { border-color: var(--cor-neon); outline: none; }
         
+        /* Grid de Upload de Imagens Multiplas */
+        .grid-fotos-evolucao { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 5px; }
+        @media (max-width: 480px) {
+            .grid-fotos-evolucao { grid-template-columns: 1fr; }
+        }
+
         /* Upload Customizado */
-        .upload-container { position: relative; width: 100%; background: #111827; border: 2px dashed #374151; border-radius: 8px; padding: 20px; text-align: center; cursor: pointer; }
+        .upload-container { position: relative; width: 100%; background: #111827; border: 2px dashed #374151; border-radius: 8px; padding: 15px 10px; text-align: center; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 140px; }
         .upload-container:hover { border-color: var(--cor-neon); }
         .upload-container input[type="file"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
-        .preview-imagem { max-width: 100%; max-height: 200px; margin-top: 10px; border-radius: 6px; display: none; }
+        .preview-imagem { max-width: 100%; max-height: 120px; margin-top: 8px; border-radius: 6px; display: none; object-fit: cover; }
+        .legenda-upload { font-size: 11px; color: var(--texto-mutado); margin-top: 4px; max-width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .btn-enviar { width: 100%; background: var(--cor-neon); color: #000; font-weight: bold; padding: 14px; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-enviar { width: 100%; background: var(--cor-neon); color: #000; font-weight: bold; padding: 14px; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; }
         .btn-enviar:disabled { background: #4b5563; color: #9ca3af; cursor: not-allowed; }
     </style>
 </head>
@@ -145,12 +152,41 @@
                     </div>
 
                     <div class="campo-form">
-                        <label>Foto de Evolução (Frente, Lado ou Costas)</label>
-                        <div class="upload-container">
-                            <i class="fa-solid fa-cloud-arrow-up" style="font-size: 24px; color: var(--cor-neon); margin-bottom: 8px;"></i>
-                            <p id="upload-status" style="font-size: 13px;">Clique aqui para selecionar ou tirar a foto</p>
-                            <input type="file" id="feedback-foto" accept="image/*" onchange="capturarPreviewFoto(this)">
-                            <img id="img-preview" class="preview-imagem" src="" alt="Preview">
+                        <label>Fotos de Evolução (Envie as 4 posições)</label>
+                        <div class="grid-fotos-evolucao">
+                            
+                            <div class="upload-container">
+                                <i class="fa-solid fa-camera" style="font-size: 18px; color: var(--cor-neon); margin-bottom: 4px;"></i>
+                                <span style="font-size: 13px; font-weight: bold;">1. Frente</span>
+                                <p id="status-frente" class="legenda-upload">Toque p/ selecionar</p>
+                                <input type="file" accept="image/*" onchange="capturarPreviewMultiplo(this, 'frente')">
+                                <img id="preview-frente" class="preview-imagem" src="" alt="Preview Frente">
+                            </div>
+
+                            <div class="upload-container">
+                                <i class="fa-solid fa-camera" style="font-size: 18px; color: var(--cor-neon); margin-bottom: 4px;"></i>
+                                <span style="font-size: 13px; font-weight: bold;">2. Lado Esquerdo</span>
+                                <p id="status-lado_esq" class="legenda-upload">Toque p/ selecionar</p>
+                                <input type="file" accept="image/*" onchange="capturarPreviewMultiplo(this, 'lado_esq')">
+                                <img id="preview-lado_esq" class="preview-imagem" src="" alt="Preview Lado Esquerdo">
+                            </div>
+
+                            <div class="upload-container">
+                                <i class="fa-solid fa-camera" style="font-size: 18px; color: var(--cor-neon); margin-bottom: 4px;"></i>
+                                <span style="font-size: 13px; font-weight: bold;">3. Costas</span>
+                                <p id="status-costas" class="legenda-upload">Toque p/ selecionar</p>
+                                <input type="file" accept="image/*" onchange="capturarPreviewMultiplo(this, 'costas')">
+                                <img id="preview-costas" class="preview-imagem" src="" alt="Preview Costas">
+                            </div>
+
+                            <div class="upload-container">
+                                <i class="fa-solid fa-camera" style="font-size: 18px; color: var(--cor-neon); margin-bottom: 4px;"></i>
+                                <span style="font-size: 13px; font-weight: bold;">4. Lado Direito</span>
+                                <p id="status-lado_dir" class="legenda-upload">Toque p/ selecionar</p>
+                                <input type="file" accept="image/*" onchange="capturarPreviewMultiplo(this, 'lado_dir')">
+                                <img id="preview-lado_dir" class="preview-imagem" src="" alt="Preview Lado Direito">
+                            </div>
+
                         </div>
                     </div>
 
@@ -171,7 +207,14 @@
         let dadosDoAluno = { rotinasTreino: [], rotinasDieta: [] };
         let alunoIdSelecionado = "";
         let idExercicioComGifAberto = null;
-        let arquivoFotoSelecionado = null;
+        
+        // Objeto global para armazenar os arquivos de imagem capturados
+        let arquivosFotos = {
+            frente: null,
+            lado_esq: null,
+            costas: null,
+            lado_dir: null
+        };
 
         window.onload = async function() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -189,7 +232,6 @@
         };
 
         async function puxarDadosDoAlunoDoBanco() {
-            // Treinos
             let { data: blocos } = await _supabase.from('treinos_blocos').select('*').eq('aluno_id', alunoIdSelecionado).order('ordem');
             let treinos = [];
             if(blocos) {
@@ -199,7 +241,6 @@
                 }
             }
 
-            // Dietas
             let { data: dias } = await _supabase.from('dieta_dias').select('*').eq('aluno_id', alunoIdSelecionado).order('ordem');
             let dietas = [];
             if(dias) {
@@ -222,12 +263,10 @@
 
             dadosDoAluno.rotinasTreino = treinos;
             dadosDoAluno.rotinasDieta = dietas;
-            
             renderizarModoAluno();
         }
 
         function renderizarModoAluno() {
-            // Renderização da aba de Treinos
             document.getElementById('container-blocos-treino').innerHTML = dadosDoAluno.rotinasTreino.map(b => `
                 <div class="bloco-secao" id="${b.idBloco}">
                     <div class="header-bloco" onclick="alternarBlocoLayout('${b.idBloco}', 'treino')">
@@ -253,7 +292,6 @@
                 </div>
             `).join('');
 
-            // Renderização da aba de Dieta
             if(dadosDoAluno.rotinasDieta.length === 0) {
                 document.getElementById('conteudo-refeicoes-dinamicas').innerHTML = '<p style="text-align:center; padding:20px; color:var(--texto-mutado);">Nenhum protocolo ativo de dieta encontrado.</p>';
             } else {
@@ -267,7 +305,7 @@
 
                     let htmlRefeicoesInternas = dia.refeicoes.map(ref => {
                         let refKcal = 0, refCarbo = 0, refProt = 0, refGord = 0;
-                        let linhasAlimentos = ref.alimentos.map(al => {
+                        let lines = ref.alimentos.map(al => {
                             refKcal += al.kcalTotal; refCarbo += al.carboTotal; refProt += al.protTotal; refGord += al.gordTotal;
                             return `<tr><td>${al.nome}</td><td>${al.quantidade}g</td><td style="font-size:12px; color:var(--texto-mutado);">${Math.round(al.carboTotal)}g C / ${Math.round(al.protTotal)}g P / ${Math.round(al.gordTotal)}g G</td></tr>`;
                         }).join('');
@@ -280,7 +318,7 @@
                                 </div>
                                 <table>
                                     <thead><tr><th>Alimento</th><th>Qtd</th><th>Macros</th></tr></thead>
-                                    <tbody>${linhasAlimentos}</tbody>
+                                    <tbody>${lines}</tbody>
                                 </table>
                             </div>
                         `;
@@ -312,7 +350,6 @@
             }
         }
 
-        // Executa a transição de sanfona minimizando os demais blocos abertos
         function alternarBlocoLayout(id, tipoAba) {
             const elClicado = document.getElementById(id);
             if (!elClicado) return;
@@ -321,42 +358,31 @@
             const todosOsBlocos = document.getElementById(containerPaiId).querySelectorAll('.bloco-secao');
             const jaEstavaExpandido = elClicado.classList.contains('expandido');
 
-            // Se for treino, recolhe o player antes de fechar o bloco completo
             if (tipoAba === 'treino') {
                 removerLinhaGifComAnimacao();
                 idExercicioComGifAberto = null;
             }
 
-            // Minimiza todos os blocos ativos da mesma seção
-            todosOsBlocos.forEach(bloco => {
-                bloco.classList.remove('expandido');
-            });
+            todosOsBlocos.forEach(bloco => { bloco.classList.remove('expandido'); });
 
-            // Se o bloco alvo estava fechado, expande ele
             if (!jaEstavaExpandido) {
                 elClicado.classList.add('expandido');
-                setTimeout(() => {
-                    elClicado.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }, 150);
+                setTimeout(() => { elClicado.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 150);
             }
         }
 
-        // Injeta e coordena a exibição do player 364x364 centralizado com animação
         function gerenciarIframeInjetado(exId, url) {
             const linhaEx = document.getElementById(`linha-ex-${exId}`);
             if (!linhaEx) return;
 
-            // Caso clique no exercício que já está aberto, executa animação de fechamento
             if (idExercicioComGifAberto === exId) {
                 removerLinhaGifComAnimacao();
                 idExercicioComGifAberto = null;
                 return;
             }
 
-            // Se houver outro GIF aberto em outro exercício, remove primeiro
             removerLinhaGifComAnimacao();
 
-            // Monta o elemento da linha e o wrapper estruturado
             const novaLinha = document.createElement('tr');
             novaLinha.id = 'linha-gif-dinamica';
             novaLinha.className = 'linha-gif-exercicio';
@@ -371,25 +397,19 @@
             linhaEx.parentNode.insertBefore(novaLinha, linhaEx.nextSibling);
             idExercicioComGifAberto = exId;
 
-            // Trigger sutil para ativar a animação de entrada controlada pelo CSS
             setTimeout(() => {
                 const wrapper = document.getElementById('wrapper-gif-elemento');
                 if (wrapper) wrapper.classList.add('ativo');
             }, 20);
         }
 
-        // Remove a linha do iframe aplicando efeito suave de fade/colapso antes de deletar do DOM
         function removerLinhaGifComAnimacao() {
             const linhaExistente = document.getElementById('linha-gif-dinamica');
             const wrapper = document.getElementById('wrapper-gif-elemento');
-            
             if (linhaExistente && wrapper) {
-                wrapper.classList.remove('ativo'); // Inicia animação de saída reversa do CSS
-                linhaExistente.id = 'linha-gif-deletando'; // Evita conflitos de ID durante o delay de transição
-                
-                setTimeout(() => {
-                    linhaExistente.remove();
-                }, 400); // Sincronizado com o tempo de transition do CSS (.4s)
+                wrapper.classList.remove('ativo');
+                linhaExistente.id = 'linha-gif-deletando';
+                setTimeout(() => { linhaExistente.remove(); }, 400);
             }
         }
 
@@ -400,31 +420,32 @@
                     document.querySelectorAll('.conteudo-aba').forEach(c => c.classList.remove('ativa'));
                     btn.classList.add('ativa'); 
                     document.getElementById(btn.dataset.aba).classList.add('ativa');
-                    
-                    // Reseta os estados e limpa os ifs ao alternar as abas do app
                     removerLinhaGifComAnimacao();
                     idExercicioComGifAberto = null;
                 });
             });
         }
 
-        function capturarPreviewFoto(input) {
+        // Nova Função Captura de Pré-visualização Múltipla
+        function capturarPreviewMultiplo(input, posicao) {
             const file = input.files[0];
-            const preview = document.getElementById('img-preview');
-            const statusText = document.getElementById('upload-status');
+            const preview = document.getElementById(`preview-${posicao}`);
+            const statusText = document.getElementById(`status-${posicao}`);
             
             if (file) {
-                arquivoFotoSelecionado = file;
+                arquivosFotos[posicao] = file;
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     preview.src = e.target.result;
                     preview.style.display = 'block';
-                    statusText.innerText = "Foto selecionada: " + file.name;
+                    statusText.innerText = "Selecionada ✓";
+                    statusText.style.color = "var(--cor-neon)";
                 }
                 reader.readAsDataURL(file);
             }
         }
 
+        // Função de envio unificada tratando as 4 posições
         async function enviarFeedbackCompleto() {
             const texto = document.getElementById('feedback-texto').value.trim();
             const btn = document.getElementById('btn-enviar-feedback');
@@ -432,44 +453,64 @@
             if(!texto) return alert("Por favor, preencha o seu comentário semanal.");
             
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando Relatório...';
 
-            let urlPublicaFoto = null;
+            // Armazenará os links gerados do Storage do Supabase
+            let urlsGeradas = { frente: null, lado_esq: null, costas: null, lado_dir: null };
 
-            try {
-                if (arquivoFotoSelecionado) {
-                    const extensao = arquivoFotoSelecionado.name.split('.').pop();
-                    const nomeArquivo = `${alunoIdSelecionado}/${Date.now()}.${extensao}`;
+            // Laço para rodar o upload das imagens selecionadas
+            for (let posicao in arquivosFotos) {
+                if (arquivosFotos[posicao]) {
+                    try {
+                        const fileObj = arquivosFotos[posicao];
+                        const extensao = fileObj.name.split('.').pop();
+                        const nomeArquivo = `${alunoIdSelecionado}/${Date.now()}_${posicao}.${extensao}`;
 
-                    let { error: uploadError } = await _supabase.storage
-                        .from('fotos-evolucao')
-                        .upload(nomeArquivo, arquivoFotoSelecionado);
+                        let { error: uploadError } = await _supabase.storage
+                            .from('fotos-evolucao')
+                            .upload(nomeArquivo, fileObj);
 
-                    if (uploadError) throw uploadError;
-                    urlPublicaFoto = `${SUPABASE_URL}/storage/v1/object/public/fotos-evolucao/${nomeArquivo}`;
+                        if (uploadError) throw uploadError;
+                        
+                        urlsGeradas[posicao] = `${SUPABASE_URL}/storage/v1/object/public/fotos-evolucao/${nomeArquivo}`;
+                    } catch (uploadErr) {
+                        console.error(`Erro no upload da foto (${posicao}):`, uploadErr);
+                    }
                 }
+            }
 
+            // Envia para a tabela 'feedbacks_alunos'
+            try {
                 const { error: insertError } = await _supabase
                     .from('feedbacks_alunos')
                     .insert({
                         aluno_id: alunoIdSelecionado,
                         comentario: texto,
-                        foto_url: urlPublicaFoto
+                        foto_url: urlsGeradas.frente,       // Link principal (Frente)
+                        foto_lado_esq: urlsGeradas.lado_esq, // Garanta que essas colunas existam na tabela!
+                        foto_costas: urlsGeradas.costas,
+                        foto_lado_dir: urlsGeradas.lado_dir
                     });
 
                 if (insertError) throw insertError;
 
-                alert("Boa, o relatório foi enviado com sucesso! O gorila tá evoluindo! 🦍");
+                alert("Boa, o relatório com as fotos foi enviado com sucesso! O gorila tá evoluindo! 🦍");
                 
+                // Reseta os campos do formulário
                 document.getElementById('feedback-texto').value = "";
-                document.getElementById('feedback-foto').value = "";
-                document.getElementById('img-preview').style.display = 'none';
-                document.getElementById('upload-status').innerText = "Clique aqui para selecionar ou tirar a foto";
-                arquivoFotoSelecionado = null;
+                arquivosFotos = { frente: null, lado_esq: null, costas: null, lado_dir: null };
+                
+                const posicoes = ['frente', 'lado_esq', 'costas', 'lado_dir'];
+                posicoes.forEach(p => {
+                    document.getElementById(`preview-${p}`).style.display = 'none';
+                    const st = document.getElementById(`status-${p}`);
+                    st.innerText = "Toque p/ selecionar";
+                    st.style.color = "var(--texto-mutado)";
+                });
 
             } catch (err) {
-                console.error(err);
-                alert("Ocorreu um erro ao processar o envio. Tente novamente.");
+                console.error("Erro final no banco de dados:", err);
+                alert("Ocorreu um erro ao registrar as informações no banco de dados. Tente novamente.");
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Atualização 🦍';
