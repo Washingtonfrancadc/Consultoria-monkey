@@ -34,50 +34,62 @@
 
         /* Blocos e Secções */
         .bloco-secao { background: var(--bg-card); border-radius: 12px; margin-bottom: 15px; border: 1px solid #374151; overflow: hidden; }
-        .header-bloco { display: flex; align-items: center; justify-content: space-between; padding: 16px; cursor: pointer; }
+        .header-bloco { display: flex; align-items: center; justify-content: space-between; padding: 16px; cursor: pointer; position: relative; z-index: 2; }
         .titulo-secao { font-weight: bold; font-size: 16px; display: flex; align-items: center; width: 100%; }
-        .seta-recolher { margin-left: auto; transition: 0.3s; color: var(--texto-mutado); }
+        .seta-recolher { margin-left: auto; transition: transform 0.5s ease; color: var(--texto-mutado); }
         .bloco-secao.expandido .seta-recolher { transform: rotate(180deg); }
         
-        .corpo-recolhivel { display: none; padding: 0 16px 16px 16px; }
-        .bloco-secao.expandido .corpo-recolhivel { display: block; }
+        /* Animação do Corpo do Accordion */
+        .corpo-recolhivel { 
+            max-height: 0; 
+            opacity: 0; 
+            overflow: hidden; 
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+            padding: 0 16px;
+        }
+        .bloco-secao.expandido .corpo-recolhivel { 
+            max-height: 2000px; /* Valor alto o suficiente para comportar o conteúdo livremente */
+            opacity: 1; 
+            padding: 0 16px 16px 16px;
+        }
+
+        /* Estilo para agrupamento secundário interno (Refeições) */
+        .bloco-refeicao-interno { background: #111827; border-radius: 8px; border: 1px solid #374151; margin-top: 10px; margin-bottom: 10px; padding: 12px; }
+        .titulo-refeicao-interna { font-size: 14px; font-weight: bold; color: var(--texto-claro); border-bottom: 1px solid #374151; padding-bottom: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; }
 
         /* Tabelas de Treino e Dieta */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 5px; }
         th { text-align: left; color: var(--texto-mutado); font-size: 12px; padding-bottom: 8px; text-transform: uppercase; }
-        td { padding: 12px 0; border-top: 1px solid #374151; font-size: 14px; }
+        td { padding: 12px 0; border-top: 1px solid #374151; font-size: 14px; vertical-align: middle; }
 
-        /* Container do GIF corrigido para Mobile e centralizado abaixo da lista */
-        #containerGif { 
-            display: none; 
+        /* Linha injetada do GIF */
+        .linha-gif-exercicio td { padding: 0; border-top: none; text-align: center; }
+
+        /* Container do GIF centralizado 364x364 com transições */
+        .wrapper-gif-dinamico { 
             max-width: 364px; 
             width: 100%;
             height: 364px; 
             background: #000; 
             border-radius: 8px; 
-            margin: 15px auto; /* Centraliza horizontalmente e dá espaçamento vertical */
             border: 1px solid var(--cor-neon); 
-            padding: 1px; 
+            margin: 10px auto 15px auto;
             overflow: hidden;
+            display: block;
+            transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            max-height: 0;
+            opacity: 0;
+            transform: scale(0.9);
         }
-
-        /* Player interno responsivo */
-        #videoIframe { 
-            width: 100%; 
-            height: 100%; 
-            border-radius: 8px; 
-            border: none; 
-            display: block; 
-            overflow: hidden;
+        .wrapper-gif-dinamico.ativo {
+            max-height: 364px;
+            opacity: 1;
+            transform: scale(1);
         }
-
-        /* Seletor de Dias de Dieta */
-        .lista-dias-dieta { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 15px; padding-bottom: 5px; }
-        .btn-dia { background: #111827; border: 1px solid #374151; color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 13px; cursor: pointer; white-space: nowrap; }
-        .btn-dia.ativo { background: transparent; border-color: var(--cor-neon); color: var(--cor-neon); }
+        .wrapper-gif-dinamico iframe { width: 100%; height: 100%; border: none; display: block; }
 
         /* Macros da Dieta */
-        .resumo-macros { display: flex; justify-content: space-between; margin-top: 15px; background: #111827; padding: 12px; border-radius: 8px; gap: 5px; }
+        .resumo-macros { display: flex; justify-content: space-between; margin-top: 15px; background: #0f172a; padding: 12px; border-radius: 8px; gap: 5px; }
         .macro-box { text-align: center; flex: 1; }
         .macro-box p { font-size: 11px; color: var(--texto-mutado); text-transform: uppercase; }
         .macro-box div { font-size: 14px; font-weight: bold; margin-top: 4px; color: var(--texto-claro); }
@@ -115,14 +127,9 @@
 
         <div id="aba-treino" class="conteudo-aba ativa">
             <div id="container-blocos-treino"></div>
-            
-            <div id="containerGif">
-                <iframe id="videoIframe" src="" allow="autoplay"></iframe>
-            </div>
         </div>
 
         <div id="aba-dieta" class="conteudo-aba">
-            <div class="lista-dias-dieta" id="container-dias-dieta"></div>
             <div id="conteudo-refeicoes-dinamicas"></div>
         </div>
 
@@ -163,9 +170,7 @@
 
         let dadosDoAluno = { rotinasTreino: [], rotinasDieta: [] };
         let alunoIdSelecionado = "";
-        let gifAtualSendoExibido = "";
-        let idDiaDietaAtivo = "";
-        let estadosAbasExpandidas = {};
+        let idExercicioComGifAberto = null;
         let arquivoFotoSelecionado = null;
 
         window.onload = async function() {
@@ -180,10 +185,11 @@
             }
 
             await puxarDadosDoAlunoDoBanco();
-            configurarAbas();
+            configureTabs();
         };
 
         async function puxarDadosDoAlunoDoBanco() {
+            // Treinos
             let { data: blocos } = await _supabase.from('treinos_blocos').select('*').eq('aluno_id', alunoIdSelecionado).order('ordem');
             let treinos = [];
             if(blocos) {
@@ -193,6 +199,7 @@
                 }
             }
 
+            // Dietas
             let { data: dias } = await _supabase.from('dieta_dias').select('*').eq('aluno_id', alunoIdSelecionado).order('ordem');
             let dietas = [];
             if(dias) {
@@ -215,128 +222,188 @@
 
             dadosDoAluno.rotinasTreino = treinos;
             dadosDoAluno.rotinasDieta = dietas;
-            if(dadosDoAluno.rotinasDieta.length > 0 && !idDiaDietaAtivo) idDiaDietaAtivo = dadosDoAluno.rotinasDieta[0].idDia;
             
             renderizarModoAluno();
         }
 
         function renderizarModoAluno() {
+            // Renderização da aba de Treinos
             document.getElementById('container-blocos-treino').innerHTML = dadosDoAluno.rotinasTreino.map(b => `
-                <div class="bloco-secao ${estadosAbasExpandidas[b.idBloco] ? 'expandido' : ''}" id="${b.idBloco}">
-                    <div class="header-bloco" onclick="alternarBlocoLayout('${b.idBloco}')">
+                <div class="bloco-secao" id="${b.idBloco}">
+                    <div class="header-bloco" onclick="alternarBlocoLayout('${b.idBloco}', 'treino')">
                         <div class="titulo-secao">${b.nomeBloco} <i class="fa-solid fa-chevron-down seta-recolher"></i></div>
                     </div>
                     <div class="corpo-recolhivel">
                         <table>
                             <thead><tr><th>Exercício</th><th>Séries</th><th>Reps</th><th>Desc.</th></tr></thead>
                             <tbody>
-                                ${b.exercicios.map(ex => `<tr><td style="color:var(--cor-neon); cursor:pointer;" onclick="gerenciarAnimacaoGif('${ex.gif_url}')"><i class="fa-solid fa-play-circle" style="margin-right:5px;"></i>${ex.nome}</td><td>${ex.series}</td><td>${ex.reps}</td><td>${ex.descanso}</td></tr>`).join('')}
+                                ${b.exercicios.map(ex => `
+                                    <tr id="linha-ex-${ex.id}">
+                                        <td style="color:var(--cor-neon); cursor:pointer;" onclick="gerenciarIframeInjetado('${ex.id}', '${ex.gif_url}')">
+                                            <i class="fa-solid fa-play-circle" style="margin-right:5px;"></i>${ex.nome}
+                                        </td>
+                                        <td>${ex.series}</td>
+                                        <td>${ex.reps}</td>
+                                        <td>${ex.descanso}</td>
+                                    </tr>
+                                `).join('')}
                             </tbody>
                         </table>
                     </div>
                 </div>
             `).join('');
 
-            document.getElementById('container-dias-dieta').innerHTML = dadosDoAluno.rotinasDieta.map(d => `<button class="btn-dia ${d.idDia === idDiaDietaAtivo ? 'ativo' : ''}" onclick="idDiaDietaAtivo='${d.idDia}'; renderizarModoAluno();">${d.nomeDia}</button>`).join('');
-            
-            const dia = dadosDoAluno.rotinasDieta.find(d => d.idDia === idDiaDietaAtivo);
-            if(!dia || dia.refeicoes.length === 0) { 
-                document.getElementById('conteudo-refeicoes-dinamicas').innerHTML = '<p style="text-align:center; padding:20px; color:var(--texto-mutado);">Nenhum protocolo ativo para este dia.</p>'; 
-                return; 
-            }
+            // Renderização da aba de Dieta
+            if(dadosDoAluno.rotinasDieta.length === 0) {
+                document.getElementById('conteudo-refeicoes-dinamicas').innerHTML = '<p style="text-align:center; padding:20px; color:var(--texto-mutado);">Nenhum protocolo ativo de dieta encontrado.</p>';
+            } else {
+                document.getElementById('conteudo-refeicoes-dinamicas').innerHTML = dadosDoAluno.rotinasDieta.map(dia => {
+                    let diaKcal = 0, diaCarbo = 0, diaProt = 0, diaGord = 0;
+                    dia.refeicoes.forEach(ref => {
+                        ref.alimentos.forEach(al => {
+                            diaKcal += al.kcalTotal; diaCarbo += al.carboTotal; diaProt += al.protTotal; diaGord += al.gordTotal;
+                        });
+                    });
 
-            document.getElementById('conteudo-refeicoes-dinamicas').innerHTML = dia.refeicoes.map((ref, rIdx) => {
-                const idRef = `ref_${dia.idDia}_${rIdx}`;
-                let k=0, c=0, p=0, g=0;
-                let linhas = ref.alimentos.map(al => { k+=al.kcalTotal; c+=al.carboTotal; p+=al.protTotal; g+=al.gordTotal; return `<tr><td>${al.nome}</td><td>${al.quantidade}g</td><td style="font-size:12px; color:var(--texto-mutado);">${Math.round(al.carboTotal)}g C / ${Math.round(al.protTotal)}g P / ${Math.round(al.gordTotal)}g G</td></tr>`; }).join('');
-                return `
-                    <div class="bloco-secao ${estadosAbasExpandidas[idRef] ? 'expandido' : ''}" id="${idRef}">
-                        <div class="header-bloco" onclick="alternarBlocoLayout('${idRef}')">
-                            <div class="titulo-secao">${ref.nomeRefeicao} <span style="font-size:12px; color:var(--cor-neon); margin-left:auto; margin-right:10px;">${Math.round(k)} Kcal</span> <i class="fa-solid fa-chevron-down seta-recolher"></i></div>
-                        </div>
-                        <div class="corpo-recolhivel">
-                            <table><thead><tr><th>Alimento</th><th>Qtd</th><th>Macros</th></tr></thead><tbody>${linhas}</tbody></table>
-                            <div class="resumo-macros">
-                                <div class="macro-box"><p>Kcal</p><div>${Math.round(k)}</div></div><div class="macro-box"><p>Carbo</p><div>${Math.round(c)}g</div></div><div class="macro-box"><p>Prot</p><div>${Math.round(p)}g</div></div><div class="macro-box"><p>Gord</p><div>${Math.round(g)}g</div></div>
+                    let htmlRefeicoesInternas = dia.refeicoes.map(ref => {
+                        let refKcal = 0, refCarbo = 0, refProt = 0, refGord = 0;
+                        let linhasAlimentos = ref.alimentos.map(al => {
+                            refKcal += al.kcalTotal; refCarbo += al.carboTotal; refProt += al.protTotal; refGord += al.gordTotal;
+                            return `<tr><td>${al.nome}</td><td>${al.quantidade}g</td><td style="font-size:12px; color:var(--texto-mutado);">${Math.round(al.carboTotal)}g C / ${Math.round(al.protTotal)}g P / ${Math.round(al.gordTotal)}g G</td></tr>`;
+                        }).join('');
+
+                        return `
+                            <div class="bloco-refeicao-interno">
+                                <div class="titulo-refeicao-interna">
+                                    <span>${ref.nomeRefeicao}</span>
+                                    <span style="color: var(--cor-neon); font-size:13px;">${Math.round(refKcal)} Kcal</span>
+                                </div>
+                                <table>
+                                    <thead><tr><th>Alimento</th><th>Qtd</th><th>Macros</th></tr></thead>
+                                    <tbody>${linhasAlimentos}</tbody>
+                                </table>
+                            </div>
+                        `;
+                    }).join('');
+
+                    return `
+                        <div class="bloco-secao" id="${dia.idDia}">
+                            <div class="header-bloco" onclick="alternarBlocoLayout('${dia.idDia}', 'dieta')">
+                                <div class="titulo-secao">
+                                    ${dia.nomeDia} 
+                                    <span style="font-size:13px; color:var(--cor-neon); margin-left:auto; margin-right:12px; font-weight:bold;">
+                                        Total: ${Math.round(diaKcal)} Kcal
+                                    </span> 
+                                    <i class="fa-solid fa-chevron-down seta-recolher"></i>
+                                </div>
+                            </div>
+                            <div class="corpo-recolhivel">
+                                ${htmlRefeicoesInternas}
+                                <div class="resumo-macros">
+                                    <div class="macro-box"><p>Kcal Dia</p><div style="color:var(--cor-neon);">${Math.round(diaKcal)}</div></div>
+                                    <div class="macro-box"><p>Carbo</p><div>${Math.round(diaCarbo)}g</div></div>
+                                    <div class="macro-box"><p>Prot</p><div>${Math.round(diaProt)}g</div></div>
+                                    <div class="macro-box"><p>Gord</p><div>${Math.round(diaGord)}g</div></div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function alternarBlocoLayout(id) {
-            const el = document.getElementById(id);
-            if(el) { 
-                el.classList.toggle('expandido'); 
-                estadosAbasExpandidas[id] = el.classList.contains('expandido'); 
-                if(!el.classList.contains('expandido')) fecharIframeSuave();
+                    `;
+                }).join('');
             }
         }
 
-        function gerenciarAnimacaoGif(url) {
-            const c = document.getElementById('containerGif'); 
-            const ifr = document.getElementById('videoIframe');
-            
-            c.style.transition = 'max-height 0.5s ease-in-out, opacity 0.5s ease-in-out, transform 0.5s ease-in-out';
-            c.style.overflow = 'hidden';
+        // Executa a transição de sanfona minimizando os demais blocos abertos
+        function alternarBlocoLayout(id, tipoAba) {
+            const elClicado = document.getElementById(id);
+            if (!elClicado) return;
 
-            if (gifAtualSendoExibido === url) { 
-                fecharIframeSuave();
-                return; 
+            const containerPaiId = tipoAba === 'treino' ? 'container-blocos-treino' : 'conteudo-refeicoes-dinamicas';
+            const todosOsBlocos = document.getElementById(containerPaiId).querySelectorAll('.bloco-secao');
+            const jaEstavaExpandido = elClicado.classList.contains('expandido');
+
+            // Se for treino, recolhe o player antes de fechar o bloco completo
+            if (tipoAba === 'treino') {
+                removerLinhaGifComAnimacao();
+                idExercicioComGifAberto = null;
             }
-            
-            if (gifAtualSendoExibido !== "" && c.style.opacity === '1') {
-                c.style.opacity = '0';
-                c.style.transform = 'translateY(15px)';
+
+            // Minimiza todos os blocos ativos da mesma seção
+            todosOsBlocos.forEach(bloco => {
+                bloco.classList.remove('expandido');
+            });
+
+            // Se o bloco alvo estava fechado, expande ele
+            if (!jaEstavaExpandido) {
+                elClicado.classList.add('expandido');
                 setTimeout(() => {
-                    ifr.src = url;
-                    gifAtualSendoExibido = url;
-                    c.style.opacity = '1';
-                    c.style.transform = 'translateY(0)';
-                }, 200);
-            } else {
-                ifr.src = url; 
-                gifAtualSendoExibido = url;
-                c.style.maxHeight = '0px';
-                c.style.opacity = '0';
-                c.style.transform = 'translateY(40px)'; 
-                c.style.display = 'block'; 
-                c.offsetHeight; 
-
-                c.style.maxHeight = '500px'; 
-                c.style.opacity = '1';
-                c.style.transform = 'translateY(0)';
-                c.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    elClicado.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 150);
             }
         }
 
-        function fecharIframeSuave() {
-            const c = document.getElementById('containerGif');
-            const ifr = document.getElementById('videoIframe');
-            if(!c || gifAtualSendoExibido === "") return;
-            c.style.maxHeight = '0px';
-            c.style.opacity = '0';
-            c.style.transform = 'translateY(40px)'; 
-            setTimeout(() => { if (ifr) ifr.src = ""; gifAtualSendoExibido = ""; }, 500);
+        // Injeta e coordena a exibição do player 364x364 centralizado com animação
+        function gerenciarIframeInjetado(exId, url) {
+            const linhaEx = document.getElementById(`linha-ex-${exId}`);
+            if (!linhaEx) return;
+
+            // Caso clique no exercício que já está aberto, executa animação de fechamento
+            if (idExercicioComGifAberto === exId) {
+                removerLinhaGifComAnimacao();
+                idExercicioComGifAberto = null;
+                return;
+            }
+
+            // Se houver outro GIF aberto em outro exercício, remove primeiro
+            removerLinhaGifComAnimacao();
+
+            // Monta o elemento da linha e o wrapper estruturado
+            const novaLinha = document.createElement('tr');
+            novaLinha.id = 'linha-gif-dinamica';
+            novaLinha.className = 'linha-gif-exercicio';
+            novaLinha.innerHTML = `
+                <td colspan="4">
+                    <div class="wrapper-gif-dinamico" id="wrapper-gif-elemento">
+                        <iframe src="${url}" allow="autoplay"></iframe>
+                    </div>
+                </td>
+            `;
+
+            linhaEx.parentNode.insertBefore(novaLinha, linhaEx.nextSibling);
+            idExercicioComGifAberto = exId;
+
+            // Trigger sutil para ativar a animação de entrada controlada pelo CSS
+            setTimeout(() => {
+                const wrapper = document.getElementById('wrapper-gif-elemento');
+                if (wrapper) wrapper.classList.add('ativo');
+            }, 20);
         }
 
-        function fecharIframeImediato() { 
-            const c = document.getElementById('containerGif');
-            if(c) { c.style.transition = 'none'; c.style.maxHeight = '0px'; c.style.opacity = '0'; c.style.transform = 'translateY(40px)'; }
-            const ifr = document.getElementById('videoIframe');
-            if(ifr) ifr.src = ""; 
-            gifAtualSendoExibido = ""; 
+        // Remove a linha do iframe aplicando efeito suave de fade/colapso antes de deletar do DOM
+        function removerLinhaGifComAnimacao() {
+            const linhaExistente = document.getElementById('linha-gif-dinamica');
+            const wrapper = document.getElementById('wrapper-gif-elemento');
+            
+            if (linhaExistente && wrapper) {
+                wrapper.classList.remove('ativo'); // Inicia animação de saída reversa do CSS
+                linhaExistente.id = 'linha-gif-deletando'; // Evita conflitos de ID durante o delay de transição
+                
+                setTimeout(() => {
+                    linhaExistente.remove();
+                }, 400); // Sincronizado com o tempo de transition do CSS (.4s)
+            }
         }
 
-        function configurarAbas() {
+        function configureTabs() {
             document.querySelectorAll('.menu-abas .aba-link').forEach(btn => {
                 btn.addEventListener('click', () => {
                     document.querySelectorAll('.menu-abas .aba-link').forEach(b => b.classList.remove('ativa'));
                     document.querySelectorAll('.conteudo-aba').forEach(c => c.classList.remove('ativa'));
                     btn.classList.add('ativa'); 
                     document.getElementById(btn.dataset.aba).classList.add('ativa');
-                    fecharIframeImediato();
+                    
+                    // Reseta os estados e limpa os ifs ao alternar as abas do app
+                    removerLinhaGifComAnimacao();
+                    idExercicioComGifAberto = null;
                 });
             });
         }

@@ -9,7 +9,6 @@ let listaGlobalAlunosCompleta = [];
 let alunoIdSelecionado = "";
 let modoEdicaoAtivo = false;
 let gifAtualSendoExibido = "";
-let idDiaDietaAtivo = "";
 
 let blocoAlvoParaAdicionarExercicio = "";
 let dietaAlvoIndices = { diaIdx: null, refIdx: null };
@@ -107,10 +106,10 @@ function recalcularCaloriasAutomaticas(idxD, idxR, idxA) {
 function recalcularMacrosPorPesoDigitado(idxD, idxR, idxA) {
     let item = dadosDoAluno.rotinasDieta[idxD].refeicoes[idxR].alimentos[idxA];
     if (!item.porcaoBase) return;
-    let fator = item.quantidade / item.porcaoBase;
-    item.carboTotal = Number((item.carboBase * fator).toFixed(1));
-    item.protTotal = Number((item.protBase * fator).toFixed(1));
-    item.gordTotal = Number((item.gordBase * fator).toFixed(1));
+    let factor = item.quantidade / item.porcaoBase;
+    item.carboTotal = Number((item.carboBase * factor).toFixed(1));
+    item.protTotal = Number((item.protBase * factor).toFixed(1));
+    item.gordTotal = Number((item.gordBase * factor).toFixed(1));
     item.kcalTotal = Number(((item.protTotal * 4) + (item.carboTotal * 4) + (item.gordTotal * 9)).toFixed(0));
     renderizarModoTreinador();
 }
@@ -147,7 +146,6 @@ async function puxarDadosDoAlunoDoBanco() {
     }
     dadosDoAluno.rotinasTreino = treinos;
     dadosDoAluno.rotinasDieta = dietas;
-    if(dadosDoAluno.rotinasDieta.length > 0 && !idDiaDietaAtivo) idDiaDietaAtivo = dadosDoAluno.rotinasDieta[0].idDia;
     renderizarInterface();
 }
 
@@ -170,6 +168,7 @@ function alternarBlocoLayout(id) {
 }
 
 function renderizarModoAluno() {
+    // Renderiza Treinos
     document.getElementById('container-blocos-treino').innerHTML = dadosDoAluno.rotinasTreino.map(b => `
         <div class="bloco-secao ${estadosAbasExpandidas[b.idBloco] ? 'expandido' : ''}" id="${b.idBloco}">
             <div class="header-bloco-editavel" onclick="alternarBlocoLayout('${b.idBloco}')">
@@ -186,23 +185,59 @@ function renderizarModoAluno() {
         </div>
     `).join('');
 
-    document.getElementById('container-dias-dieta').innerHTML = dadosDoAluno.rotinasDieta.map(d => `<button class="btn-dia ${d.idDia === idDiaDietaAtivo ? 'ativo' : ''}" onclick="idDiaDietaAtivo='${d.idDia}'; renderizarModoAluno();">${d.nomeDia}</button>`).join('');
-    const dia = dadosDoAluno.rotinasDieta.find(d => d.idDia === idDiaDietaAtivo);
-    if(!dia || dia.refeicoes.length === 0) { document.getElementById('conteudo-refeicoes-dinamicas').innerHTML = '<p style="text-align:center; padding:20px; color:var(--texto-mutado);">Nenhuma refeição activa.</p>'; return; }
+    // Renderiza Dieta (Estrutura de Accordion Vertical por Dia de Dieta)
+    if(dadosDoAluno.rotinasDieta.length === 0) {
+        document.getElementById('conteudo-refeicoes-dinamicas').innerHTML = '<p style="text-align:center; padding:20px; color:var(--texto-mutado);">Nenhuma dieta ativa cadastrada.</p>';
+        return;
+    }
 
-    document.getElementById('conteudo-refeicoes-dinamicas').innerHTML = dia.refeicoes.map((ref, rIdx) => {
-        const idRef = `ref_${dia.idDia}_${rIdx}`;
-        let k=0, c=0, p=0, g=0;
-        let linhas = ref.alimentos.map(al => { k+=al.kcalTotal; c+=al.carboTotal; p+=al.protTotal; g+=al.gordTotal; return `<tr><td>${al.nome}</td><td>${al.quantidade}g</td><td style="font-size:12px; color:var(--texto-mutado);">${Math.round(al.carboTotal)}g C / ${Math.round(al.protTotal)}g P / ${Math.round(al.gordTotal)}g G</td></tr>`; }).join('');
+    document.getElementById('conteudo-refeicoes-dinamicas').innerHTML = dadosDoAluno.rotinasDieta.map(dia => {
+        let diaKcal = 0, diaCarbo = 0, diaProt = 0, diaGord = 0;
+
+        // Bloco interno de renderização das refeições daquele dia específico
+        let htmlRefeicoesDoDia = dia.refeicoes.map((ref, rIdx) => {
+            const idRef = `ref_${dia.idDia}_${rIdx}`;
+            let refKcal = 0, refCarbo = 0, refProt = 0, refGord = 0;
+            
+            let linhasAlimentos = ref.alimentos.map(al => { 
+                refKcal += al.kcalTotal; refCarbo += al.carboTotal; refProt += al.protTotal; refGord += al.gordTotal; 
+                return `<tr><td>${al.nome}</td><td>${al.quantidade}g</td><td style="font-size:12px; color:var(--texto-mutado);">${Math.round(al.carboTotal)}g C / ${Math.round(al.protTotal)}g P / ${Math.round(al.gordTotal)}g G</td></tr>`; 
+            }).join('');
+
+            diaKcal += refKcal; diaCarbo += refCarbo; diaProt += refProt; diaGord += refGord;
+
+            return `
+                <div style="background: #111827; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #334155;">
+                    <p style="font-weight: bold; color: white; border-bottom: 1px dashed #334155; padding-bottom: 6px; margin-bottom: 8px; display:flex; justify-content:space-between;">
+                        <span><i class="fa-solid fa-plate-wheat" style="color:var(--verde); margin-right:6px;"></i>${ref.nomeRefeicao}</span>
+                        <span style="color:var(--cor-neon); font-size:13px;">${Math.round(refKcal)} Kcal</span>
+                    </p>
+                    <table><thead><tr><th>Alimento</th><th>Qtd</th><th>Macros</th></tr></thead><tbody>${linhasAlimentos}</tbody></table>
+                </div>
+            `;
+        }).join('');
+
+        if(dia.refeicoes.length === 0) {
+            htmlRefeicoesDoDia = '<p style="color:var(--texto-mutado); font-size:13px; padding:10px 0;">Nenhuma refeição cadastrada para este dia.</p>';
+        }
+
+        // Retorna o bloco do Dia como um Accordion Geral reaproveitando o layout visual nativo
         return `
-            <div class="bloco-secao ${estadosAbasExpandidas[idRef] ? 'expandido' : ''}" id="${idRef}">
-                <div class="header-bloco-editavel" onclick="alternarBlocoLayout('${idRef}')">
-                    <div class="titulo-secao">${ref.nomeRefeicao} <span style="font-size:12px; color:var(--cor-neon); margin-left:auto; margin-right:10px;">${Math.round(k)} Kcal</span> <i class="fa-solid fa-chevron-down seta-recolher"></i></div>
+            <div class="bloco-secao dieta-fade-in ${estadosAbasExpandidas[dia.idDia] ? 'expandido' : ''}" id="${dia.idDia}">
+                <div class="header-bloco-editavel" onclick="alternarBlocoLayout('${dia.idDia}')">
+                    <div class="titulo-secao">
+                        <span><i class="fa-solid fa-calendar-day" style="color: var(--cor-neon); margin-right: 8px;"></i>${dia.nomeDia}</span>
+                        <span style="font-size:13px; color:var(--cor-neon); margin-left:auto; margin-right:12px;">${Math.round(diaKcal)} Kcal</span>
+                        <i class="fa-solid fa-chevron-down seta-recolher"></i>
+                    </div>
                 </div>
                 <div class="corpo-recolhivel">
-                    <table><thead><tr><th>Alimento</th><th>Qtd</th><th>Macros</th></tr></thead><tbody>${linhas}</tbody></table>
-                    <div class="resumo-macros">
-                        <div class="macro-box"><p>Kcal</p><div>${Math.round(k)}</div></div><div class="macro-box"><p>Carbo</p><div>${Math.round(c)}g</div></div><div class="macro-box"><p>Prot</p><div>${Math.round(p)}g</div></div><div class="macro-box"><p>Gord</p><div>${Math.round(g)}g</div></div>
+                    ${htmlRefeicoesDoDia}
+                    <div class="resumo-macros" style="background:#090d16;">
+                        <div class="macro-box"><p>Total Dia</p><div>${Math.round(diaKcal)} kcal</div></div>
+                        <div class="macro-box"><p>Carbo</p><div>${Math.round(diaCarbo)}g</div></div>
+                        <div class="macro-box"><p>Prot</p><div>${Math.round(diaProt)}g</div></div>
+                        <div class="macro-box"><p>Gord</p><div>${Math.round(diaGord)}g</div></div>
                     </div>
                 </div>
             </div>
@@ -212,6 +247,8 @@ function renderizarModoAluno() {
 
 function renderizarModoTreinador() {
     fecharIframeImediato();
+    
+    // Modo Treinador - Treinos
     document.getElementById('container-blocos-treino').innerHTML = dadosDoAluno.rotinasTreino.map((b, bIdx) => `
         <div class="bloco-secao expandido">
             <div class="header-bloco-editavel">
@@ -230,18 +267,19 @@ function renderizarModoTreinador() {
         </div>
     `).join('');
 
-    document.getElementById('container-dias-dieta').innerHTML = dadosDoAluno.rotinasDieta.map((d, dIdx) => `
-        <div style="display:flex; gap:5px; background:var(--bg-card); padding:5px; border-radius:6px; border:1px solid #4b5563;">
-            <input type="text" class="input-inline" style="width:120px;" value="${d.nomeDia}" onchange="dadosDoAluno.rotinasDieta[${dIdx}].nomeDia = this.value">
-            <button class="btn-remover" onclick="dadosDoAluno.rotinasDieta.splice(${dIdx},1); renderizarModoTreinador();"><i class="fa-solid fa-trash"></i></button>
-        </div>
-    `).join('');
-
+    // Modo Treinador - Dieta Alinhado Verticalmente
     document.getElementById('conteudo-refeicoes-dinamicas').innerHTML = dadosDoAluno.rotinasDieta.map((d, dIdx) => `
-        <div style="border:1px dashed var(--cor-neon); padding:15px; border-radius:12px; margin-bottom:20px;">
-            <p style="color:var(--cor-neon); font-weight:bold; margin-bottom:10px;"><i class="fa-solid fa-calendar-day"></i> Refeições do dia: ${d.nomeDia}</p>
+        <div style="border:1px dashed var(--cor-neon); padding:15px; border-radius:12px; margin-bottom:20px; background: var(--bg-card);">
+            <div style="display:flex; gap:10px; margin-bottom:15px; align-items:center; justify-content:space-between;">
+                <div style="display:flex; gap:5px; align-items:center;">
+                    <i class="fa-solid fa-calendar-day" style="color:var(--cor-neon);"></i>
+                    <input type="text" class="input-inline" style="width:160px; font-weight:bold; color:white;" value="${d.nomeDia}" onchange="dadosDoAluno.rotinasDieta[${dIdx}].nomeDia = this.value">
+                </div>
+                <button class="btn-danger" style="padding: 8px 12px;" onclick="dadosDoAluno.rotinasDieta.splice(${dIdx},1); renderizarModoTreinador();"><i class="fa-solid fa-trash"></i> Excluir Dia</button>
+            </div>
+            
             ${d.refeicoes.map((ref, rIdx) => `
-                <div class="bloco-secao expandido" style="background:#111827;">
+                <div class="bloco-secao expandido" style="background:#111827; margin-bottom:12px;">
                     <div class="header-bloco-editavel">
                         <input type="text" class="input-inline" value="${ref.nomeRefeicao}" onchange="dadosDoAluno.rotinasDieta[${dIdx}].refeicoes[${rIdx}].nomeRefeicao=this.value">
                         <button class="btn-danger" onclick="dadosDoAluno.rotinasDieta[${dIdx}].refeicoes.splice(${rIdx},1); renderizarModoTreinador();">Excluir</button>
@@ -345,27 +383,23 @@ async function salvarAlteracoesNoBanco() {
     await puxarDadosDoAlunoDoBanco();
 }
 
-function trocarAlunoNoPainel(id) { alunoIdSelecionado=id; idDiaDietaAtivo=""; puxarDadosDoAlunoDoBanco(); }
+function trocarAlunoNoPainel(id) { alunoIdSelecionado=id; puxarDadosDoAlunoDoBanco(); }
 
-// ALTERAÇÃO: Gerenciador de animação com efeito mais lento (0.5s), subindo ao abrir e descendo ao fechar.
 function gerenciarAnimacaoGif(url) {
     const c = document.getElementById('containerGif'); 
     const ifr = document.getElementById('videoIframe');
     
-    // Configura a transição CSS base para suavidade completa
     c.style.transition = 'max-height 0.5s ease-in-out, opacity 0.5s ease-in-out, transform 0.5s ease-in-out, padding 0.5s ease-in-out';
     c.style.overflow = 'hidden';
 
-    // Se clicar no mesmo exercício, fecha suavemente
     if (gifAtualSendoExibido === url) { 
         fecharIframeSuave();
         return; 
     }
     
-    // Se o player já está aberto trocando para outro exercício (Fade rápido no conteúdo)
     if (gifAtualSendoExibido !== "" && c.style.opacity === '1') {
         c.style.opacity = '0';
-        c.style.transform = 'translateY(15px)'; // Leve descida na troca externa
+        c.style.transform = 'translateY(15px)';
         
         setTimeout(() => {
             ifr.src = url;
@@ -375,20 +409,16 @@ function gerenciarAnimacaoGif(url) {
             c.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }, 200);
     } else {
-        // Player fechado -> abrindo (Movimento vindo de baixo "subindo")
         ifr.src = url; 
         gifAtualSendoExibido = url;
         
-        // Estado inicial oculto/abaixo
         c.style.maxHeight = '0px';
         c.style.opacity = '0';
         c.style.transform = 'translateY(40px)'; 
         c.style.display = 'block'; 
         
-        // Força o reflow do navegador para processar o estado inicial antes da animação
         c.offsetHeight; 
 
-        // Ativa os estados finais de abertura (subindo e expandindo)
         c.style.maxHeight = '500px'; 
         c.style.opacity = '1';
         c.style.transform = 'translateY(0)';
@@ -397,7 +427,6 @@ function gerenciarAnimacaoGif(url) {
     }
 }
 
-// ALTERAÇÃO: Animação de fechamento controlada (descendo e encolhendo)
 function fecharIframeSuave() {
     const c = document.getElementById('containerGif');
     const ifr = document.getElementById('videoIframe');
@@ -405,20 +434,16 @@ function fecharIframeSuave() {
     if(!c || gifAtualSendoExibido === "") return;
 
     c.style.transition = 'max-height 0.5s ease-in-out, opacity 0.5s ease-in-out, transform 0.5s ease-in-out, padding 0.5s ease-in-out';
-    
-    // Ativa animação de descida e encolhimento vertical
     c.style.maxHeight = '0px';
     c.style.opacity = '0';
     c.style.transform = 'translateY(40px)'; 
     
-    // Limpa a URL e reseta estados somente após o término da animação física (500ms)
     setTimeout(() => {
         if (ifr) ifr.src = ""; 
         gifAtualSendoExibido = "";
     }, 500);
 }
 
-// Fechamento instantâneo sem delay para transição de abas do app
 function fecharIframeImediato() { 
     const c = document.getElementById('containerGif');
     if(c) {
@@ -437,8 +462,10 @@ function configurarAbas() {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.menu-abas .aba-link').forEach(b => b.classList.remove('ativa'));
             document.querySelectorAll('.conteudo-aba').forEach(c => c.classList.remove('ativa'));
-            btn.classList.add('ativa'); document.getElementById(btn.dataset.aba).classList.add('ativa');
-            fecharIframeImediato(); renderizarInterface();
+            btn.classList.add('ativa'); 
+            document.getElementById(btn.dataset.aba).classList.add('ativa');
+            fecharIframeImediato(); 
+            renderizarInterface();
         });
     });
 }
@@ -447,10 +474,10 @@ document.getElementById('btn-novo-bloco-treino').addEventListener('click', () =>
     dadosDoAluno.rotinasTreino.push({ idBloco: "n_"+Date.now(), nomeBloco: 'Novo Bloco Treino', exercicios: [] });
     renderizarModoTreinador();
 });
+
 document.getElementById('btn-novo-dia-dieta').addEventListener('click', () => {
-    let id = "nd_"+Date.now();
-    dadosDoAluno.rotinasDieta.push({ idDia: id, nomeDia: 'Novo Protocolo', refeicoes: [] });
-    idDiaDietaAtivo = id; renderizarModoTreinador();
+    dadosDoAluno.rotinasDieta.push({ idDia: "nd_"+Date.now(), nomeDia: 'Novo Protocolo', refeicoes: [] });
+    renderizarModoTreinador();
 });
 
 document.getElementById('btnEditar').addEventListener('click', () => {
