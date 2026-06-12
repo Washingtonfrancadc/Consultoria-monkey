@@ -67,9 +67,9 @@
 
         /* Container do GIF centralizado 364x364 com transições */
         .wrapper-gif-dinamico { 
-            max-width: 364px; 
+            max-width: 362px; 
             width: 100%;
-            height: 364px; 
+            height: 362px; 
             background: #000; 
             border-radius: 8px; 
             border: 1px solid var(--cor-neon); 
@@ -375,14 +375,41 @@
             const staticLine = document.getElementById(`linha-ex-${exId}`);
             if (!staticLine) return;
 
+            // 1. Se clicou no MESMO exercício que já está aberto, fecha com animação
             if (idExercicioComGifAberto === exId) {
                 removerLinhaGifComAnimacao();
                 idExercicioComGifAberto = null;
                 return;
             }
 
-            removerLinhaGifComAnimacao();
+            const linhaExistente = document.getElementById('linha-gif-dinamica');
 
+            // 2. Se já existe um GIF aberto (outro exercício), faz a transição fluida
+            if (linhaExistente) {
+                const wrapperAnitgo = document.getElementById('wrapper-gif-elemento');
+                if (wrapperAnitgo) {
+                    // Remove a classe ativa para iniciar o fade out / encolhimento do atual
+                    wrapperAnitgo.classList.remove('ativo');
+                    
+                    // Aguarda o fade out terminar (400ms) antes de mover e carregar o novo GIF
+                    setTimeout(() => {
+                        // Move a linha existente para logo após o novo exercício clicado
+                        staticLine.parentNode.insertBefore(linhaExistente, staticLine.nextSibling);
+                        
+                        // Atualiza o iframe com a nova URL
+                        wrapperAnitgo.innerHTML = `<iframe src="${url}" allow="autoplay"></iframe>`;
+                        
+                        // Força o gatilho da nova animação de abertura (fade in)
+                        setTimeout(() => {
+                            wrapperAnitgo.classList.add('ativo');
+                        }, 50);
+                    }, 400); // Tempo exato da transição CSS do seu style
+                }
+                idExercicioComGifAberto = exId;
+                return;
+            }
+
+            // 3. Se NÃO havia nenhum GIF aberto, cria e abre do zero normalmente
             const novaLinha = document.createElement('tr');
             novaLinha.id = 'linha-gif-dinamica';
             novaLinha.className = 'linha-gif-exercicio';
@@ -400,7 +427,7 @@
             setTimeout(() => {
                 const wrapper = document.getElementById('wrapper-gif-elemento');
                 if (wrapper) wrapper.classList.add('ativo');
-            }, 20);
+            }, 50);
         }
 
         function removerLinhaGifComAnimacao() {
