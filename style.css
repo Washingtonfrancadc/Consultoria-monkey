@@ -1,119 +1,131 @@
-/* --- CONFIGURAÇÕES BASE --- */
 :root {
-    --bg-principal: #0f172a;
-    --bg-card: #1e293b;
-    --cor-neon: #deff9a;
-    --texto-claro: #f8fafc;
-    --texto-mutado: #94a3b8;
-    --vermelho: #ef4444;
-    --verde: #10b981;
-}
+            --bg-principal: #0b0f19;
+            --bg-card: #1f2937;
+            --cor-neon: #a3e635; /* Verde limão/neon da Monkey */
+            --texto-claro: #f3f4f6;
+            --texto-mutado: #9ca3af;
+        }
 
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-body { background-color: var(--bg-principal); color: var(--texto-claro); padding-bottom: 60px; }
-.container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial', sans-serif; }
+        body { background-color: var(--bg-principal); color: var(--texto-claro); padding-bottom: 60px; }
 
-/* --- PAINEL ADMINISTRATIVO --- */
-.painel-admin { background: #111827; border: 2px dashed var(--cor-neon); padding: 15px; border-radius: 12px; margin-bottom: 20px; }
-.painel-admin h3 { color: var(--cor-neon); margin-bottom: 10px; font-size: 16px; display: flex; align-items: center; gap: 8px; }
-.select-aluno { background: var(--bg-card); color: white; border: 1px solid #4b5563; padding: 8px; border-radius: 6px; width: 100%; margin-bottom: 10px; font-size: 14px; }
-.grupo-botoes { display: flex; gap: 10px; flex-wrap: wrap; }
+        .header-consultoria { text-align: center; padding: 30px 20px; background: linear-gradient(180deg, #111827 0%, var(--bg-principal) 100%); }
+        .header-consultoria h1 { color: var(--texto-claro); font-size: 28px; letter-spacing: 1px; }
+        .header-consultoria h1 span { color: var(--cor-neon); }
+        .header-consultoria p { color: var(--texto-mutado); font-style: italic; font-size: 14px; margin-top: 5px; }
 
-.btn { border: none; padding: 10px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 14px; transition: 0.2s; }
-.btn-modo { background: #3b82f6; color: white; }
-.btn-alunos { background: #8b5cf6; color: white; }
-.btn-salvar { background: var(--verde); color: white; }
-.btn-add { background: transparent; border: 1px solid var(--cor-neon); color: var(--cor-neon); margin-top: 15px; width: 100%; justify-content: center; }
-.btn-remover { background: var(--vermelho); color: white; padding: 6px 10px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; }
-.btn-danger { background: #374151; color: #f9fafb; font-size: 12px; padding: 6px 10px; border-radius: 6px; border: 1px solid #4b5563; cursor: pointer; }
-.btn-danger:hover { background: var(--vermelho); }
+        /* Menu de Abas */
+        .menu-abas { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; padding: 0 15px; }
+        .aba-link { background: #111827; border: 1px solid #374151; color: var(--texto-mutado); padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; flex: 1; max-width: 150px; text-align: center; }
+        .aba-link.ativa { background: var(--cor-neon); color: #000; border-color: var(--cor-neon); }
 
-/* --- TOPO / BRANDING --- */
-.header-app { text-align: center; margin: 20px 0; }
-.header-app h1 { font-size: 28px; letter-spacing: 1px; }
-.header-app h1 span { color: var(--cor-neon); }
-.slogan { font-size: 12px; color: var(--texto-mutado); font-style: italic; margin-top: 4px; }
+        .app-container { max-width: 600px; margin: 0 auto; padding: 0 15px; }
+        .conteudo-aba { display: none; }
+        .conteudo-aba.ativa { display: block; }
 
-/* --- SISTEMA DE ABAS --- */
-.menu-abas { display: flex; background: var(--bg-card); border-radius: 8px; margin-bottom: 20px; overflow: hidden; border: 1px solid #334155; }
-.aba-link { flex: 1; text-align: center; padding: 15px 0; cursor: pointer; color: var(--texto-mutado); font-weight: bold; transition: 0.3s; background: none; border: none; font-size: 16px; }
-.aba-link.ativa { background: var(--cor-neon); color: #000; }
-.conteudo-aba { display: none; }
-.conteudo-aba.ativa { display: block; }
+        /* Blocos e Secções */
+        .bloco-secao { background: var(--bg-card); border-radius: 12px; margin-bottom: 15px; border: 1px solid #374151; overflow: hidden; }
+        .header-bloco { display: flex; align-items: center; justify-content: space-between; padding: 16px; cursor: pointer; position: relative; z-index: 2; }
+        .titulo-secao { font-weight: bold; font-size: 16px; display: flex; align-items: center; width: 100%; }
+        .seta-recolher { margin-left: auto; transition: transform 0.5s ease; color: var(--texto-mutado); }
+        .bloco-secao.expandido .seta-recolher { transform: rotate(180deg); }
+        
+        /* Animação do Corpo do Accordion */
+        .corpo-recolhivel { 
+            max-height: 0; 
+            opacity: 0; 
+            overflow: hidden; 
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+            padding: 0 16px;
+        }
+        .bloco-secao.expandido .corpo-recolhivel { 
+            max-height: 2000px; 
+            opacity: 1; 
+            padding: 0 16px 16px 16px;
+        }
 
-/* --- SELEÇÃO DE DIAS (DIETA ANTIGA / AUXILIAR) --- */
-.menu-dieta-dias { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
-.btn-dia { background: var(--bg-card); color: var(--texto-claro); border: 1px solid #334155; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; white-space: nowrap; font-size: 14px; }
-.btn-dia.ativo { background: var(--cor-neon); color: #000; border-color: var(--cor-neon); }
+        /* Estilo para agrupamento secundário interno (Refeições) */
+        .bloco-refeicao-interno { background: #111827; border-radius: 8px; border: 1px solid #374151; margin-top: 10px; margin-bottom: 10px; padding: 12px; }
+        .titulo-refeicao-interna { font-size: 14px; font-weight: bold; color: var(--texto-claro); border-bottom: 1px solid #374151; padding-bottom: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; }
 
-/* --- BLOCOS E TABELAS --- */
-.bloco-secao { background: var(--bg-card); border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2); }
-.header-bloco-editavel { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0px; gap: 15px; cursor: pointer; }
-.modo-edicao-ativo .header-bloco-editavel { cursor: default; margin-bottom: 15px; }
-.titulo-secao { border-left: 4px solid var(--cor-neon); padding-left: 10px; font-size: 18px; font-weight: bold; flex-grow: 1; color: white; display: flex; justify-content: space-between; align-items: center; }
-.titulo-secao i.seta-recolher { color: var(--texto-mutado); font-size: 14px; transition: 0.3s; margin-right: 5px; }
+        /* Tabelas de Treino e Dieta */
+        table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+        th { text-align: left; color: var(--texto-mutado); font-size: 12px; padding-bottom: 8px; text-transform: uppercase; }
+        td { padding: 12px 0; border-top: 1px solid #374151; font-size: 14px; vertical-align: middle; }
 
-.corpo-recolhivel { display: none; margin-top: 15px; }
-.bloco-secao.expandido .corpo-recolhivel { display: block; }
-.bloco-secao.expandido .seta-recolher { transform: rotate(180deg); color: var(--cor-neon); }
+        /* Limita a largura máxima do nome do exercício no mobile e força a quebra de linha */
+        table td:first-child {
+            max-width: 120px; /* Ajuste esse valor se quiser mais largo ou mais estreito */
+            word-wrap: break-word;
+            white-space: normal;
+            padding-right: 10px; /* Garante um respiro antes da próxima coluna */
+        }
 
-table { width: 100%; border-collapse: collapse; }
-th { text-align: left; color: var(--texto-mutado); font-size: 11px; padding-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-td { padding: 12px 4px; border-bottom: 1px solid #334155; font-size: 15px; vertical-align: middle; }
+        /* Centraliza os títulos das colunas (Séries, Reps, Desc.) */
+        table th:not(:first-child) {
+            text-align: center;
+        }
 
-.input-inline { background: #0f172a; color: white; border: 1px solid #4b5563; padding: 8px; border-radius: 6px; width: 100%; font-size: 14px; }
-.input-inline:focus { border-color: var(--cor-neon); outline: none; }
+        /* Centraliza os dados das colunas (Séries, Reps, Desc.) */
+        table td:not(:first-child) {
+            text-align: center;
+        }
 
-.resumo-macros { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 15px; background: #111827; padding: 12px; border-radius: 8px; border: 1px solid #334155; }
-.macro-box { text-align: center; }
-.macro-box p { font-size: 10px; color: var(--texto-mutado); text-transform: uppercase; margin-bottom: 2px; }
-.macro-box div { font-weight: bold; font-size: 15px; color: var(--cor-neon); }
+        /* Garante que os títulos das colunas também acompanhem o alinhamento */
+        table th:first-child {
+            max-width: 180px;
+        }
 
-/* --- CONTÊINER DO IFRAME CENTRALIZADO EM 360X360 --- */
-.container-gif { 
-    width: 364px; 
-    height: 364px; 
-    background: #111827; 
-    border-radius: 12px; 
-    margin: 25px auto; 
-    display: none; 
-    border: 2px solid var(--cor-neon); 
-    overflow: hidden; 
-    position: relative;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.7);
-}
-.container-gif.aberto { display: flex; }
-.container-gif iframe { width: 100%; height: 100%; border: none; }
+        /* Linha injetada do GIF */
+        .linha-gif-exercicio td { padding: 0; border-top: none; text-align: center; }
 
-.grid-fotos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
-.foto-box { background: #0f172a; border: 1px dashed #4b5563; height: 140px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 13px; color: var(--texto-mutado); cursor: pointer; transition: 0.2s; }
-.foto-box:hover { border-color: var(--cor-neon); color: var(--texto-claro); }
+        /* Container do GIF centralizado 364x364 com transições */
+        .wrapper-gif-dinamico { 
+            max-width: 362px; 
+            width: 100%;
+            height: 362px; 
+            background: #000; 
+            border-radius: 8px; 
+            border: 1px solid var(--cor-neon); 
+            margin: 10px auto 15px auto;
+            overflow: hidden;
+            display: block;
+            transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            max-height: 0;
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        .wrapper-gif-dinamico.ativo {
+            max-height: 364px;
+            opacity: 1;
+            transform: scale(1);
+        }
+        .wrapper-gif-dinamico iframe { width: 100%; height: 100%; border: none; display: block; }
 
-/* --- MODAIS DE GERENCIAMENTO --- */
-.modal-biblioteca { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
-.modal-conteudo { background: var(--bg-card); width: 100%; max-width: 550px; border-radius: 12px; border: 1px solid #334155; overflow: hidden; display: flex; flex-direction: column; max-height: 80vh; }
-.modal-header { padding: 15px; background: #111827; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
-.modal-body { padding: 15px; overflow-y: auto; flex-grow: 1; }
+        /* Macros da Dieta */
+        .resumo-macros { display: flex; justify-content: space-between; margin-top: 15px; background: #0f172a; padding: 12px; border-radius: 8px; gap: 5px; }
+        .macro-box { text-align: center; flex: 1; }
+        .macro-box p { font-size: 11px; color: var(--texto-mutado); text-transform: uppercase; }
+        .macro-box div { font-size: 14px; font-weight: bold; margin-top: 4px; color: var(--texto-claro); }
 
-.pasta-musculo { background: #111827; padding: 12px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 10px; border: 1px solid #334155; }
-.pasta-musculo:hover { border-color: var(--cor-neon); }
-.lista-exercicios-pasta { display: none; padding-left: 15px; margin-top: 10px; }
-.lista-exercicios-pasta.aberta { display: block; }
-.item-exercicio-biblioteca { padding: 10px; border-bottom: 1px solid #111827; cursor: pointer; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
-.item-exercicio-biblioteca:hover { color: var(--cor-neon); background: #1e293b; }
+        /* Formulário de Evolução */
+        .campo-form { margin-bottom: 15px; }
+        .campo-form label { display: block; color: var(--texto-mutado); font-size: 13px; margin-bottom: 6px; }
+        .input-texto { width: 100%; background: #111827; border: 1px solid #374151; color: #fff; padding: 12px; border-radius: 8px; font-size: 14px; }
+        .input-texto:focus { border-color: var(--cor-neon); outline: none; }
+        
+        /* Grid de Upload de Imagens Multiplas */
+        .grid-fotos-evolucao { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 5px; }
+        @media (max-width: 480px) {
+            .grid-fotos-evolucao { grid-template-columns: 1fr; }
+        }
 
-.form-cadastro { display: grid; gap: 12px; margin-top: 10px; margin-bottom: 15px; background: #111827; padding: 15px; border-radius: 8px; border: 1px dashed #4b5563; }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        /* Upload Customizado */
+        .upload-container { position: relative; width: 100%; background: #111827; border: 2px dashed #374151; border-radius: 8px; padding: 15px 10px; text-align: center; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 140px; }
+        .upload-container:hover { border-color: var(--cor-neon); }
+        .upload-container input[type="file"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        .preview-imagem { max-width: 100%; max-height: 120px; margin-top: 8px; border-radius: 6px; display: none; object-fit: cover; }
+        .legenda-upload { font-size: 11px; color: var(--texto-mutado); margin-top: 4px; max-width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.lista-alunos-gerenciar { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
-.item-aluno-edicao { background: #111827; border-radius: 6px; border: 1px solid #334155; display: flex; flex-direction: column; gap: 8px; padding:10px; }
-
-/* --- ADICIONADO: ANIMAÇÃO DE TRANSIÇÃO SUAVE PARA AS REFEIÇÕES DA DIETA --- */
-.dieta-fade-in {
-    animation: abrirSuaveDieta 0.25s ease-out;
-}
-
-@keyframes abrirSuaveDieta {
-    from { opacity: 0; transform: translateY(-4px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+        .btn-enviar { width: 100%; background: var(--cor-neon); color: #000; font-weight: bold; padding: 14px; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; }
+        .btn-enviar:disabled { background: #4b5563; color: #9ca3af; cursor: not-allowed; }
