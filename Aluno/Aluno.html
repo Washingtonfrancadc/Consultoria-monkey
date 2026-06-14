@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monkey Consultoria - Área do Aluno</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js" defer></script>
+
+</head>
+<body>
+
+    <div class="header-consultoria">
+        <h1>MONKEY <span>CONSULTORIA</span></h1>
+        <p>liberte o gorila dentro de você</p>
+    </div>
+
+    <div class="menu-abas">
+        <div class="aba-link ativa" data-aba="aba-treino"><i class="fa-solid fa-dumbbell"></i> Treino</div>
+        <div class="aba-link" data-aba="aba-dieta"><i class="fa-solid fa-apple-whole"></i> Dieta</div>
+        <div class="aba-link" data-aba="aba-evolucao"><i class="fa-solid fa-chart-line"></i> Evolução</div>
+    </div>
+
+    <div class="app-container">
+
+        <div id="aba-treino" class="conteudo-aba ativa">
+            <div id="container-blocos-treino"></div>
+        </div>
+
+        <div id="aba-dieta" class="conteudo-aba">
+            <div id="conteudo-refeicoes-dinamicas"></div>
+        </div>
+
+        <div id="aba-evolucao" class="conteudo-aba">
+            <div class="bloco-secao expandido" style="border-color: var(--cor-neon);">
+                <div class="header-bloco" style="cursor: default;">
+                    <div class="titulo-secao" style="color: var(--cor-neon);"><i class="fa-solid fa-comment-dots" style="margin-right: 8px;"></i> Relatório de Evolução Semanal</div>
+                </div>
+                <div class="corpo-recolhivel">
+                    <div class="campo-form">
+                        <label>Como foi a adesão ao plano de treino e dieta nesta semana?</label>
+                        <textarea id="feedback-texto" class="input-texto" rows="5" placeholder="Conte-me sobre sua força, cansaço, falhas na dieta ou dores..."></textarea>
+                    </div>
+
+                    <div class="campo-form">
+                        <label>Fotos de Evolução (Envie as 4 posições)</label>
+                        <div class="grid-fotos-evolucao">
+                            
+                            <div class="upload-container">
+                                <i class="fa-solid fa-camera" style="font-size: 18px; color: var(--cor-neon); margin-bottom: 4px;"></i>
+                                <span style="font-size: 13px; font-weight: bold;">1. Frente</span>
+                                <p id="status-frente" class="legenda-upload">Toque p/ selecionar</p>
+                                <input type="file" accept="image/*" onchange="capturarPreviewMultiplo(this, 'frente')">
+                                <img id="preview-frente" class="preview-imagem" src="" alt="Preview Frente">
+                            </div>
+
+                            <div class="upload-container">
+                                <i class="fa-solid fa-camera" style="font-size: 18px; color: var(--cor-neon); margin-bottom: 4px;"></i>
+                                <span style="font-size: 13px; font-weight: bold;">2. Lado Esquerdo</span>
+                                <p id="status-lado_esq" class="legenda-upload">Toque p/ selecionar</p>
+                                <input type="file" accept="image/*" onchange="capturarPreviewMultiplo(this, 'lado_esq')">
+                                <img id="preview-lado_esq" class="preview-imagem" src="" alt="Preview Lado Esquerdo">
+                            </div>
+
+                            <div class="upload-container">
+                                <i class="fa-solid fa-camera" style="font-size: 18px; color: var(--cor-neon); margin-bottom: 4px;"></i>
+                                <span style="font-size: 13px; font-weight: bold;">3. Costas</span>
+                                <p id="status-costas" class="legenda-upload">Toque p/ selecionar</p>
+                                <input type="file" accept="image/*" onchange="capturarPreviewMultiplo(this, 'costas')">
+                                <img id="preview-costas" class="preview-imagem" src="" alt="Preview Costas">
+                            </div>
+
+                            <div class="upload-container">
+                                <i class="fa-solid fa-camera" style="font-size: 18px; color: var(--cor-neon); margin-bottom: 4px;"></i>
+                                <span style="font-size: 13px; font-weight: bold;">4. Lado Direito</span>
+                                <p id="status-lado_dir" class="legenda-upload">Toque p/ selecionar</p>
+                                <input type="file" accept="image/*" onchange="capturarPreviewMultiplo(this, 'lado_dir')">
+                                <img id="preview-lado_dir" class="preview-imagem" src="" alt="Preview Lado Direito">
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <button id="btn-enviar-feedback" class="btn-enviar" onclick="enviarFeedbackCompleto()">
+                        <i class="fa-solid fa-paper-plane"></i> Enviar Atualização 🦍
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

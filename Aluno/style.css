@@ -1,0 +1,379 @@
+:root {
+    --bg-principal: #0b0f19;
+    --bg-card: #1f2937;
+    --cor-neon: #a3e635; /* Verde limão/neon da Monkey */
+    --texto-claro: #f3f4f6;
+    --texto-mutado: #9ca3af;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Arial", sans-serif;
+}
+body {
+    background-color: var(--bg-principal);
+    color: var(--texto-claro);
+    padding-bottom: 60px;
+}
+
+.header-consultoria {
+    text-align: center;
+    padding: 30px 20px;
+    background: linear-gradient(180deg, #111827 0%, var(--bg-principal) 100%);
+}
+.header-consultoria h1 {
+    color: var(--texto-claro);
+    font-size: 28px;
+    letter-spacing: 1px;
+}
+.header-consultoria h1 span {
+    color: var(--cor-neon);
+}
+.header-consultoria p {
+    color: var(--texto-mutado);
+    font-style: italic;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+/* Menu de Abas */
+.menu-abas {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 25px;
+    padding: 0 15px;
+}
+.aba-link {
+    background: #111827;
+    border: 1px solid #374151;
+    color: var(--texto-mutado);
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+    flex: 1;
+    max-width: 150px;
+    text-align: center;
+}
+.aba-link.ativa {
+    background: var(--cor-neon);
+    color: #000;
+    border-color: var(--cor-neon);
+}
+
+.app-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+.conteudo-aba {
+    display: none;
+}
+.conteudo-aba.ativa {
+    display: block;
+}
+
+/* Blocos e Secções */
+.bloco-secao {
+    background: var(--bg-card);
+    border-radius: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #374151;
+    overflow: hidden;
+}
+.header-bloco {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    cursor: pointer;
+    position: relative;
+    z-index: 2;
+}
+.titulo-secao {
+    font-weight: bold;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+.seta-recolher {
+    margin-left: auto;
+    transition: transform 0.5s ease;
+    color: var(--texto-mutado);
+}
+.bloco-secao.expandido .seta-recolher {
+    transform: rotate(180deg);
+}
+
+/* --- SISTEMA DE ANIMAÇÃO ACORDEÃO --- */
+.corpo-recolhivel {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition:
+        grid-template-rows 0.5s ease,
+        opacity 0.5s ease,
+        padding 0.5s ease;
+    padding: 0 16px;
+}
+.bloco-secao.expandido .corpo-recolhivel {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    padding: 0 16px 16px 16px;
+}
+.corpo-recolhivel-inner {
+    overflow: hidden;
+}
+
+/* Estilo para agrupamento secundário interno (Refeições) */
+.bloco-refeicao-interno {
+    background: #111827;
+    border-radius: 8px;
+    border: 1px solid #374151;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 12px;
+}
+.titulo-refeicao-interna {
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--texto-claro);
+    border-bottom: 1px solid #374151;
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* Tabelas de Treino e Dieta */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 5px;
+}
+th {
+    text-align: left;
+    color: var(--texto-mutado);
+    font-size: 12px;
+    padding-bottom: 8px;
+    text-transform: uppercase;
+}
+td {
+    padding: 12px 0;
+    border-top: 1px solid #374151;
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+/* Limita a largura máxima do nome do exercício no mobile e força a quebra de linha */
+table td:first-child {
+    max-width: 120px; /* Ajuste esse valor se quiser mais largo ou mais estreito */
+    word-wrap: break-word;
+    white-space: normal;
+    padding-right: 10px; /* Garante um respiro antes da próxima coluna */
+}
+
+/* Centraliza os títulos das colunas (Séries, Reps, Desc.) */
+table th:not(:first-child) {
+    text-align: center;
+}
+
+/* Centraliza os dados das colunas (Séries, Reps, Desc.) */
+table td:not(:first-child) {
+    text-align: center;
+}
+
+/* Garante que os títulos das colunas também acompanhem o alinhamento */
+table th:first-child {
+    max-width: 180px;
+}
+
+/* Linha injetada do GIF */
+.linha-gif-exercicio td {
+    padding: 0;
+    border-top: none;
+    text-align: center;
+}
+
+/* Container do GIF centralizado 364x364 com transições */
+.wrapper-gif-dinamico {
+    max-width: 363px;
+    width: 100%;
+    height: 363px;
+    background: #000;
+    border-radius: 8px;
+    border: 1px solid var(--cor-neon);
+    margin: 10px auto 15px auto;
+    overflow: hidden;
+    display: block;
+    transition:
+        max-height 0.5s ease,
+        opacity 0.5s ease,
+        transform 0.5s ease;
+    max-height: 0;
+    opacity: 0;
+    transform: scale(0.9);
+}
+.wrapper-gif-dinamico.ativo {
+    max-height: 363px;
+    opacity: 1;
+    transform: scale(1);
+}
+.wrapper-gif-dinamico iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+    overflow: hidden;
+    pointer-events: none; /* Ignora interações do mouse (como rolagem interna) */
+}
+
+/* Macros da Dieta */
+.resumo-macros {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    background: #0f172a;
+    padding: 12px;
+    border-radius: 8px;
+    gap: 5px;
+}
+.macro-box {
+    text-align: center;
+    flex: 1;
+}
+.macro-box p {
+    font-size: 11px;
+    color: var(--texto-mutado);
+    text-transform: uppercase;
+}
+.macro-box div {
+    font-size: 14px;
+    font-weight: bold;
+    margin-top: 4px;
+    color: var(--texto-claro);
+}
+
+/* Formulário de Evolução */
+.campo-form {
+    margin-bottom: 15px;
+}
+.campo-form label {
+    display: block;
+    color: var(--texto-mutado);
+    font-size: 13px;
+    margin-bottom: 6px;
+}
+.input-texto {
+    width: 100%;
+    background: #111827;
+    border: 1px solid #374151;
+    color: #fff;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+.input-texto:focus {
+    border-color: var(--cor-neon);
+    outline: none;
+}
+
+/* Grid de Upload de Imagens Multiplas */
+.grid-fotos-evolucao {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 5px;
+}
+
+/* Upload Customizado */
+.upload-container {
+    position: relative;
+    width: 100%;
+    background: #111827;
+    border: 2px dashed #374151;
+    border-radius: 8px;
+    padding: 15px 10px;
+    text-align: center;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 140px;
+}
+.upload-container:hover {
+    border-color: var(--cor-neon);
+}
+.upload-container input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+.preview-imagem {
+    max-width: 100%;
+    max-height: 120px;
+    margin-top: 8px;
+    border-radius: 6px;
+    display: none;
+    object-fit: cover;
+}
+.legenda-upload {
+    font-size: 11px;
+    color: var(--texto-mutado);
+    margin-top: 4px;
+    max-width: 90%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.btn-enviar {
+    width: 100%;
+    background: var(--cor-neon);
+    color: #000;
+    font-weight: bold;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+}
+.btn-enviar:disabled {
+    background: #4b5563;
+    color: #9ca3af;
+    cursor: not-allowed;
+}
+
+/* Media Query para Mobile */
+@media (max-width: 480px) {
+    .grid-fotos-evolucao {
+        grid-template-columns: 1fr;
+    }
+
+    /* Alteração para empilhar os desenhos/ícones acima do texto no menu de abas */
+    .aba-link {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 6px; /* Cria um espaçamento automático entre o desenho e o texto */
+        padding: 10px 5px; /* Reduz o padding lateral para caber melhor em telas pequenas */
+        font-size: 13px; /* Ajuste fino no tamanho da fonte se necessário */
+    }
+}
